@@ -1,4 +1,5 @@
 // This script sets up HTTPS for the application using the ASP.NET Core HTTPS certificate
+/* eslint-env node */
 import fs from 'fs';
 import { spawn } from 'child_process';
 import path from 'path';

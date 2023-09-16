@@ -1,8 +1,13 @@
-﻿namespace webapi.Models
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+
+namespace webapi.Models
 {
     public class Device
     {
-        public int _id { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string _id { get; set; }
 
         public string? deviceName { get; set; }
         public string? deviceType { get; set; }

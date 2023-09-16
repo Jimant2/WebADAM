@@ -1,8 +1,13 @@
-﻿namespace webapi.Models
+﻿using MongoDB.Bson.Serialization.Attributes;
+using MongoDB.Bson;
+
+namespace webapi.Models
 {
     public class DataSet
     {
-        public int dataSetId { get; set; }
+        [BsonId]
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string _id { get; set; }
         public int deviceId { get; set; }
 
         public DateTime timestamp { get; set; }

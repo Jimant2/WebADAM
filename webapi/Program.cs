@@ -1,11 +1,28 @@
+using MongoDB.Driver;
+using webapi;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configure MongoDB Connection
+var configuration = new ConfigurationBuilder()
+    .AddJsonFile("appsettings.json")
+    .Build();
+
+var mongoDBSettingsSection = configuration.GetSection("MongoDBSettings");
+var connectionString = mongoDBSettingsSection["ConnectionString"];
+var databaseName = mongoDBSettingsSection["DatabaseName"];
+
+var mongoClient = new MongoClient(connectionString);
+var mongoDatabase = mongoClient.GetDatabase(databaseName);
+
+builder.Services.AddSingleton<IMongoClient>(mongoClient);
+builder.Services.AddSingleton<IMongoDatabase>(mongoDatabase);
+builder.Services.AddScoped<WebADAMDBRepo>();
 
 var app = builder.Build();
 

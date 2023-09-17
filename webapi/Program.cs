@@ -23,6 +23,17 @@ var mongoDatabase = mongoClient.GetDatabase(databaseName);
 builder.Services.AddSingleton<IMongoClient>(mongoClient);
 builder.Services.AddSingleton<IMongoDatabase>(mongoDatabase);
 builder.Services.AddScoped<WebADAMDBRepo>();
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: "MyAllowSpecificOrigins",
+                      builder =>
+                      {
+                          builder.WithOrigins("https://localhost:5173") // your React app's origin
+                                 .AllowAnyHeader()
+                                 .AllowAnyMethod();
+                      });
+});
+
 
 var app = builder.Build();
 
@@ -32,6 +43,7 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+app.UseCors("MyAllowSpecificOrigins");
 
 app.UseHttpsRedirection();
 

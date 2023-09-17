@@ -15,21 +15,21 @@ public class MainController : ControllerBase
         _repository = repository;
     }
 
-    [HttpGet (Name ="device")]
+    [HttpGet ("device")]
     public ActionResult<IEnumerable<Device>> GetDevice()
     {
         var data = _repository.GetDevice();
         return Ok(data);
     }
 
-    [HttpGet(Name = "dataSet")]
+    [HttpGet("dataSet")]
     public ActionResult<IEnumerable<DataSet>> GetDataSet()
     {
         var data = _repository.GetDataSet();
         return Ok(data);
     }
 
-    [HttpGet(Name = "dataLoader")]
+    [HttpGet("dataLoader")]
     public ActionResult<IEnumerable<DataLoader>> GetDataLoader()
     {
         var data = _repository.GetDataLoader();

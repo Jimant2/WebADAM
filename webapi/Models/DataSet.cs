@@ -12,6 +12,6 @@ namespace webapi.Models
 
         public DateTime timestamp { get; set; }
 
-        public List<Data>? dataList {  get; set; }  
+        public List<Data>? Data {  get; set; }  
     }
 }

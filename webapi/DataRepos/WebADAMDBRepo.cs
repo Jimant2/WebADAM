@@ -15,7 +15,7 @@ namespace webapi.DataRepos
             dataSetCollection = database.GetCollection<DataSet>("DataSet");
             dataLoaderCollection = database.GetCollection<DataLoader>("DataLoader");
         }
-  
+
 
         public List<DataLoader> GetDataLoader()
         {
@@ -55,6 +55,14 @@ namespace webapi.DataRepos
             await dataSetCollection.InsertManyAsync(dataSet);
         }
 
-        // Implement other CRUD methods as needed
+        public async Task<List<DataSet>> GetDataSetsByDeviceNameAsync(string deviceName)
+        {
+            var device = await deviceCollection.Find(d => d.deviceName == deviceName).FirstOrDefaultAsync();
+            if (device == null) return new List<DataSet>();
+
+            return await dataSetCollection.Find(ds => ds.deviceId == device._id).ToListAsync();
+
+            // Implement other CRUD methods as needed
+        }
     }
 }

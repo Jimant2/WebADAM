@@ -1,11 +1,12 @@
-﻿namespace webapi.Models
+﻿using MongoDB.Bson.Serialization.Attributes;
+
+namespace webapi.Models
 {
     public class Data
     {
-        public int dataId {  get; set; }
-
+        [BsonElement("timestamp")]
         public DateTime timestamp { get; set; }
-
+        [BsonElement("value")]
         public int value { get; set; }
     }
 }

@@ -1,5 +1,6 @@
 using MongoDB.Driver;
-using webapi;
+using webapi.DataRepos;
+//using webapi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -7,6 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 
 // Configure MongoDB Connection
 var configuration = new ConfigurationBuilder()

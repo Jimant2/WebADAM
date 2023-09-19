@@ -8,7 +8,8 @@ namespace webapi.Models
         [BsonId]
         [BsonRepresentation(BsonType.ObjectId)]
         public string _id { get; set; }
-        public int deviceId { get; set; }
+        [BsonRepresentation(BsonType.ObjectId)]
+        public string deviceId { get; set; }
 
         public DateTime timestamp { get; set; }
 

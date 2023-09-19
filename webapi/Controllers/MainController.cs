@@ -29,12 +29,13 @@ public class MainController : ControllerBase
         return Ok(data);
     }
 
-    [HttpGet("dataSet")]
-    public ActionResult<IEnumerable<DataSet>> GetDataSet()
+    [HttpGet("dataSetByName/{deviceName}")]
+    public async Task<ActionResult<IEnumerable<DataSet>>> GetDataSet(string deviceName)
     {
-        var data = _repository.GetDataSet();
+        var data = await _repository.GetDataSetsByDeviceNameAsync(deviceName); // Note the 'await' here
         return Ok(data);
     }
+
 
     [HttpGet("dataLoader")]
     public ActionResult<IEnumerable<DataLoader>> GetDataLoader()

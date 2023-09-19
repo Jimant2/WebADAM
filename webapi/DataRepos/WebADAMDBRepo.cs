@@ -15,10 +15,7 @@ namespace webapi.DataRepos
             dataSetCollection = database.GetCollection<DataSet>("DataSet");
             dataLoaderCollection = database.GetCollection<DataLoader>("DataLoader");
         }
-
-      
-
-     
+  
 
         public List<DataLoader> GetDataLoader()
         {
@@ -53,9 +50,9 @@ namespace webapi.DataRepos
             return await dataSetCollection.Find(_ => true).ToListAsync();
         }
 
-        public async Task InsertDataSetAsync(DataSet dataSet)
+        public async Task InsertDataSetAsync(List<DataSet> dataSet)
         {
-            await dataSetCollection.InsertOneAsync(dataSet);
+            await dataSetCollection.InsertManyAsync(dataSet);
         }
 
         // Implement other CRUD methods as needed

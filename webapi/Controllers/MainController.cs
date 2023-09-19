@@ -41,8 +41,84 @@ public class MainController : ControllerBase
         return Ok(data);
     }
 
+
+
+    //[HttpPost("upload")]
+    //public async Task<IActionResult> UploadFile(IFormFile file, string deviceName, string dataType) // Added dataType parameter
+    //{
+    //    if (file == null || file.Length == 0)
+    //    {
+    //        return BadRequest("File is not provided.");
+    //    }
+
+    //    if (string.IsNullOrEmpty(deviceName))
+    //    {
+    //        return BadRequest("Device name is required.");
+    //    }
+
+    //    if (string.IsNullOrEmpty(dataType))
+    //    {
+    //        return BadRequest("Data type is required.");
+    //    }
+
+    //    try
+    //    {
+    //        // Converting from GMT to current Danish time due to system locale
+    //        DateTime date1 = DateTime.Now;
+    //        var currentTime = date1.AddHours(2);
+
+    //        var existingDevice = await _repository.GetDeviceByNameAsync(deviceName);
+
+    //        // Assuming the uploaded file contains the JSON data in string format
+    //        using (var reader = new StreamReader(file.OpenReadStream()))
+    //        {
+    //            var jsonString = await reader.ReadToEndAsync();
+
+    //            // Log the JSON content for debugging purposes
+    //            Console.WriteLine(jsonString);
+
+    //            // Deserialize the JSON as an array
+    //            var jsonArray = BsonSerializer.Deserialize<BsonArray>(jsonString);
+
+    //            // Iterate over each element in the array
+    //            foreach (var jsonDocument in jsonArray)
+    //            {
+    //                // Extract Time and EcgWaveform from each JSON document
+    //                var time = jsonDocument["Time"].ToString();
+    //                var ecgWaveform = jsonDocument["EcgWaveform"].AsInt32;
+
+    //                // Create a new Data document for each element
+    //                var newDataDocument = new Data
+    //                {
+    //                    timestamp = DateTime.UtcNow, // Set timestamp as current UTC time
+    //                    value = ecgWaveform
+    //                };
+
+    //                // Create a new DataSet document for each element
+    //                var newDataSetDocument = new DataSet
+    //                {
+    //                    deviceId = existingDevice._id,
+    //                    timestamp = currentTime, // Set the time the file has been uploaded to the DB
+    //                    dataType = dataType, // Set the dataType from the parameter
+    //                    Data = new List<Data> { newDataDocument }
+    //                };
+
+    //                // Insert the new DataSet document into the DataSet collection
+    //                await _repository.InsertDataSetAsync(newDataSetDocument);
+    //            }
+
+    //            return Ok("File uploaded, and data added to the DataSet.");
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        // Handle exceptions here
+    //        return StatusCode(500, "Internal server error.");
+    //    }
+
+
     [HttpPost("upload")]
-    public async Task<IActionResult> UploadFile(IFormFile file, string deviceName, string dataType) // Added dataType parameter
+    public async Task<IActionResult> UploadFile(IFormFile file, string deviceName, string dataType)
     {
         if (file == null || file.Length == 0)
         {
@@ -61,49 +137,47 @@ public class MainController : ControllerBase
 
         try
         {
-            // Converting from GMT to current Danish time due to system locale
             DateTime date1 = DateTime.Now;
             var currentTime = date1.AddHours(2);
 
             var existingDevice = await _repository.GetDeviceByNameAsync(deviceName);
 
-            // Assuming the uploaded file contains the JSON data in string format
             using (var reader = new StreamReader(file.OpenReadStream()))
             {
                 var jsonString = await reader.ReadToEndAsync();
 
-                // Log the JSON content for debugging purposes
-                Console.WriteLine(jsonString);
-
                 // Deserialize the JSON as an array
                 var jsonArray = BsonSerializer.Deserialize<BsonArray>(jsonString);
+
+                // Create a list to store all the DataSet documents
+                var dataSetList = new List<DataSet>();
 
                 // Iterate over each element in the array
                 foreach (var jsonDocument in jsonArray)
                 {
-                    // Extract Time and EcgWaveform from each JSON document
                     var time = jsonDocument["Time"].ToString();
                     var ecgWaveform = jsonDocument["EcgWaveform"].AsInt32;
 
-                    // Create a new Data document for each element
                     var newDataDocument = new Data
                     {
-                        timestamp = DateTime.UtcNow, // Set timestamp as current UTC time
+                        timestamp = DateTime.UtcNow,
                         value = ecgWaveform
                     };
 
-                    // Create a new DataSet document for each element
                     var newDataSetDocument = new DataSet
                     {
                         deviceId = existingDevice._id,
-                        timestamp = currentTime, // Set the time the file has been uploaded to the DB
-                        dataType = dataType, // Set the dataType from the parameter
+                        timestamp = currentTime,
+                        dataType = dataType,
                         Data = new List<Data> { newDataDocument }
                     };
 
-                    // Insert the new DataSet document into the DataSet collection
-                    await _repository.InsertDataSetAsync(newDataSetDocument);
+                    // Add the new DataSet document to the list
+                    dataSetList.Add(newDataSetDocument);
                 }
+
+                // Insert all the DataSet documents in a single database call
+                await _repository.InsertDataSetAsync(dataSetList);
 
                 return Ok("File uploaded, and data added to the DataSet.");
             }
@@ -114,7 +188,5 @@ public class MainController : ControllerBase
             return StatusCode(500, "Internal server error.");
         }
     }
-
-
 
 }

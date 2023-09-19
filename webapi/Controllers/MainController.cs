@@ -41,137 +41,8 @@ public class MainController : ControllerBase
         return Ok(data);
     }
 
-    //[HttpPost("upload")]
-    //public async Task<IActionResult> UploadFile(IFormFile file, string deviceName)
-    //{
-    //    if (file == null || file.Length == 0)
-    //    {
-    //        return BadRequest("File is not provided.");
-    //    }
-
-    //    if (string.IsNullOrEmpty(deviceName))
-    //    {
-    //        return BadRequest("Device name is required.");
-    //    }
-
-    //    try
-    //    {
-    //        // Assuming the uploaded file contains the JSON data in string format
-    //        using (var reader = new StreamReader(file.OpenReadStream()))
-    //        {
-    //            //Converting from GMT to current Danish time due to system locale
-    //            DateTime date1 = DateTime.Now;
-    //            var currentTime = date1.AddHours(2);
-
-    //            var jsonString = await reader.ReadToEndAsync();
-    //            var jsonDocument = BsonDocument.Parse(jsonString);
-
-    //            var existingDevice = await _repository.GetDeviceByNameAsync(deviceName);
-
-    //            if (existingDevice != null)
-    //            {
-    //                // Convert BsonArray to List<Data>
-    //                var dataBsonArray = jsonDocument.GetValue("Data").AsBsonArray;
-    //                var dataList = dataBsonArray.Select(d => new Data
-    //                {
-    //                    timestamp = d["timestamp"].ToUniversalTime(),
-    //                    value = d["value"].AsInt32
-    //                }).ToList();
-
-    //                // Create a new data document and set the deviceId reference
-    //                var newDataDocument = new DataSet
-    //                {
-    //                    timestamp = currentTime,
-    //                    deviceId = existingDevice._id, // Assuming DeviceId is the reference field
-    //                    Data = dataList
-    //                };
-
-    //                // Insert the new data document into the DataSet collection
-    //                await _repository.InsertDataSetAsync(newDataDocument);
-
-    //                return Ok("File uploaded and associated with the device.");
-    //            }
-    //            else
-    //            {
-    //                return BadRequest("Device with the specified name does not exist.");
-    //            }
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        // Handle exceptions here
-    //        return StatusCode(500, "Internal server error.");
-    //    }
-
-
-
-    //    // Implement other controller actions as needed
-    //}
-
-    //[HttpPost("upload")]
-    //public async Task<IActionResult> UploadFile(IFormFile file, string deviceName)
-    //{
-    //    if (file == null || file.Length == 0)
-    //    {
-    //        return BadRequest("File is not provided.");
-    //    }
-
-    //    if (string.IsNullOrEmpty(deviceName))
-    //    {
-    //        return BadRequest("Device name is required.");
-    //    }
-
-    //    try
-    //    {
-    //        // Assuming the uploaded file contains the JSON data in string format
-    //        using (var reader = new StreamReader(file.OpenReadStream()))
-    //        {
-    //            var jsonString = await reader.ReadToEndAsync();
-    //            var jsonDocument = BsonDocument.Parse(jsonString);
-
-    //            var existingDevice = await _repository.GetDeviceByNameAsync(deviceName);
-
-    //            if (existingDevice != null)
-    //            {
-    //                // Extract Time and EcgWaveform from the JSON
-    //                var time = jsonDocument.GetValue("Time").ToString();
-    //                var ecgWaveform = jsonDocument.GetValue("EcgWaveform").AsInt32;
-
-    //                // Create a new Data document
-    //                var newDataDocument = new Data
-    //                {
-    //                    timestamp = DateTime.UtcNow, // Set timestamp as current UTC time
-    //                    value = ecgWaveform
-    //                };
-
-    //                // Create a new DataSet document
-    //                var newDataSetDocument = new DataSet
-    //                {
-    //                    deviceId = existingDevice._id,
-    //                    timestamp = DateTime.UtcNow, // Set timestamp as current UTC time
-    //                    Data = new List<Data> { newDataDocument }
-    //                };
-
-    //                // Insert the new DataSet document into the DataSet collection
-    //                await _repository.InsertDataSetAsync(newDataSetDocument);
-
-    //                return Ok("File uploaded, and data added to the DataSet.");
-    //            }
-    //            else
-    //            {
-    //                return BadRequest("Device with the specified name does not exist.");
-    //            }
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        // Handle exceptions here
-    //        return StatusCode(500, "Internal server error.");
-    //    }
-    //}
-
     [HttpPost("upload")]
-    public async Task<IActionResult> UploadFile(IFormFile file, string deviceName)
+    public async Task<IActionResult> UploadFile(IFormFile file, string deviceName, string dataType) // Added dataType parameter
     {
         if (file == null || file.Length == 0)
         {
@@ -183,9 +54,19 @@ public class MainController : ControllerBase
             return BadRequest("Device name is required.");
         }
 
+        if (string.IsNullOrEmpty(dataType))
+        {
+            return BadRequest("Data type is required.");
+        }
+
         try
         {
+            // Converting from GMT to current Danish time due to system locale
+            DateTime date1 = DateTime.Now;
+            var currentTime = date1.AddHours(2);
+
             var existingDevice = await _repository.GetDeviceByNameAsync(deviceName);
+
             // Assuming the uploaded file contains the JSON data in string format
             using (var reader = new StreamReader(file.OpenReadStream()))
             {
@@ -215,7 +96,8 @@ public class MainController : ControllerBase
                     var newDataSetDocument = new DataSet
                     {
                         deviceId = existingDevice._id,
-                        timestamp = DateTime.UtcNow, // Set timestamp as current UTC time
+                        timestamp = currentTime, // Set the time the file has been uploaded to the DB
+                        dataType = dataType, // Set the dataType from the parameter
                         Data = new List<Data> { newDataDocument }
                     };
 
@@ -232,6 +114,7 @@ public class MainController : ControllerBase
             return StatusCode(500, "Internal server error.");
         }
     }
+
 
 
 }

@@ -1,81 +1,108 @@
 // eslint-disable-next-line no-unused-vars
 import React, { Component } from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 export default class App extends Component {
     static displayName = App.name;
 
-    constructor(props) {
-        super(props);
-        this.state = { devices: [], loadingDevices: true };
-
-    }
+    state = {
+        devices: [],
+        loadingDevices: true,
+        currentDatasets: [],
+        loadingDatasets: false,
+    };
 
     componentDidMount() {
         this.getDevice();
-        //this.populateWeatherData();
-       
     }
 
-    //static renderForecastsTable(forecasts) {
-    //    return (
-    //        <table className='table table-striped' aria-labelledby="tabelLabel">
-    //            <thead>
-    //                <tr>
-    //                    <th>Date</th>
-    //                    <th>Temp. (C)</th>
-    //                    <th>Temp. (F)</th>
-    //                    <th>Summary</th>
-    //                </tr>
-    //            </thead>
-    //            <tbody>
-    //                {forecasts.map(forecast =>
-    //                    <tr key={forecast.date}>
-    //                        <td>{forecast.date}</td>
-    //                        <td>{forecast.temperatureC}</td>
-    //                        <td>{forecast.temperatureF}</td>
-    //                        <td>{forecast.summary}</td>
-    //                    </tr>
-    //                )}
-    //            </tbody>
-    //        </table>
-    //    );
-    //}
-
-    static renderDevices(devices) {
-       return <a>Devices: {devices[0].deviceName}</a>
+    renderDevices = (devices) => {
+        return <span>Devices: {devices[0]?.deviceName || 'None'}</span>
+    }
+    formatTimestampToTime = (timestamp) => {
+        const date = new Date(timestamp);
+        return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
+    }
+    handleDropOnGraph = async (e) => {
+        e.preventDefault();
+        const deviceName = e.dataTransfer.getData("text/plain");
+        console.log("Fetching data for device:", deviceName);
+        await this.fetchDatasetsForDevice(deviceName);
     }
 
-    render() {
-        //let contents = this.state.loading
-        //    ? <p><em>Loading... Please refresh once the ASP.NET backend has started. See <a href="https://aka.ms/jspsintegrationreact">https://aka.ms/jspsintegrationreact</a> for more details.</em></p>
-        //    : App.renderForecastsTable(this.state.forecasts);
-        let deviceContent = this.state.loadingDevices ? <p>Loading the devices: </p> : App.renderDevices(this.state.devices);
-        return (
-            <div>
-{/*                <h1 id="tabelLabel" >Weather forecast</h1>*/}
-                <p>This component demonstrates fetching data from the server.</p>
-                {deviceContent}
-            </div>
-        );
+    fetchDatasetsForDevice = async (deviceName) => {
+        this.setState({ loadingDatasets: true });
+        const response = await fetch(`https://localhost:7074/MainController/dataSetByName/${deviceName}`);
+        if (response.ok) {
+            const dataSets = await response.json();
+            const mappedData = dataSets.flatMap(dataset => (
+                dataset.data.map(dataPoint => ({
+                    timestamp: new Date(dataPoint.timestamp).getTime(),
+                    value: dataPoint.value
+                }))
+            ));
+            mappedData.sort((a, b) => a.timestamp - b.timestamp);
+            this.setState({ currentDatasets: mappedData, loadingDatasets: false });
+        } else {
+            console.error('Failed to fetch datasets:', await response.text());
+            this.setState({ loadingDatasets: false });
+        }
     }
 
-    //async populateWeatherData() {
-    //    const response = await fetch('weatherforecast');
-    //    const data = await response.json();
-    //    this.setState({ forecasts: data, loading: false });
-    //}
 
-    async getDevice() {
+
+
+    getDevice = async () => {
         const response = await fetch('https://localhost:7074/MainController/device');
-        console.log(response);
         if (response.headers.get("content-type")?.includes("application/json")) {
             const deviceData = await response.json();
-            console.log(deviceData);
             this.setState({ devices: deviceData, loadingDevices: false });
         } else {
             console.error('Received non-JSON response:', await response.text());
         }
     }
 
+    render() {
+        const { devices, loadingDevices, currentDatasets } = this.state;
 
+        let deviceContent = loadingDevices ? <p>Loading the devices...</p> : this.renderDevices(devices);
+
+        return (
+            <div style={{ display: 'flex' }}>
+                <div>
+                    {devices.map(device => (
+                        <div key={device.id}
+                            draggable
+                            onDragStart={(e) => e.dataTransfer.setData("text/plain", device.deviceName)}>
+                            {device.deviceName}
+                        </div>
+                    ))}
+                </div>
+
+                <div style={{ flex: 1, marginLeft: '20px' }}>
+                    <p>This component demonstrates fetching data from the server.</p>
+                    {deviceContent}
+
+                    <div
+                        onDrop={this.handleDropOnGraph}
+                        onDragOver={(e) => e.preventDefault()}
+                        style={{ width: "100%", height: 300 }}>
+                        <ResponsiveContainer>
+                            <LineChart data={currentDatasets}
+                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="timestamp" scale="time" type="number" domain={['auto', 'auto']} tickFormatter={this.formatTimestampToTime} />
+                                <YAxis />
+                                <Tooltip />
+                                <Legend />
+                                <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
+                            </LineChart>
+                        </ResponsiveContainer>
+                    </div>
+                </div>
+            </div>
+        );
+    }
 }
+
+

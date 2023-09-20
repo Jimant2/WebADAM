@@ -32,10 +32,9 @@ public class MainController : ControllerBase
     [HttpGet("dataSetByName/{deviceName}")]
     public async Task<ActionResult<IEnumerable<DataSet>>> GetDataSet(string deviceName)
     {
-        var data = await _repository.GetDataSetsByDeviceNameAsync(deviceName); // Note the 'await' here
+        var data = await _repository.GetDataSetsByDeviceNameAsync(deviceName);
         return Ok(data);
     }
-
 
     [HttpGet("dataLoader")]
     public ActionResult<IEnumerable<DataLoader>> GetDataLoader()

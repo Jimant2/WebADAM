@@ -2,6 +2,8 @@
 import React, { Component } from 'react';
 import GraphVisualization from './Component/GraphVisualization';
 import { fetchDatasetsForDevice, getDevice } from './Controller/APIController';
+import Header from './Component/Header';
+import Footer from './Component/Footer';
 
 export default class App extends Component {
     static displayName = App.name;
@@ -57,6 +59,8 @@ export default class App extends Component {
         let deviceContent = loadingDevices ? <p>Loading the devices...</p> : this.renderDevices(devices);
 
         return (
+            <div className="app-container">
+                <Header />
             <div style={{ display: 'flex' }}>
                 <div>
                     {devices.map(device => (
@@ -79,7 +83,9 @@ export default class App extends Component {
                         <GraphVisualization data={currentDatasets} formatTimestampToTime={this.formatTimestampToTime} />
                     </div>
                 </div>
-            </div>
+                </div>
+                <Footer />
+                </div>
         );
     }
 }

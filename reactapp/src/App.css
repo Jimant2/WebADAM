@@ -40,3 +40,43 @@
 .read-the-docs {
   color: #888;
 }
+
+/* File dropdown styling */
+.file-dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.file-dropdown-content {
+    display: none;
+    position: absolute;
+    right: 0;
+    background-color: #f1f1f1;
+    min-width: 160px;
+    box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+    z-index: 1;
+}
+
+    .file-dropdown-content a {
+        color: black;
+        padding: 12px 16px;
+        text-decoration: none;
+        display: block;
+        text-align: left;
+    }
+
+        .file-dropdown-content a:hover {
+            background-color: #ddd;
+        }
+
+.file-dropdown:hover .file-dropdown-content {
+    display: block;
+}
+
+.file-dropbtn {
+    background-color: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 16px;
+    border: none;
+}

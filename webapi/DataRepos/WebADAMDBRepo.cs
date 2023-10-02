@@ -3,7 +3,7 @@ using webapi.Models;
 
 namespace webapi.DataRepos
 {
-    public class WebADAMDBRepo
+    public class WebADAMDBRepo : IWebADAMRepo
     {
         private readonly IMongoCollection<Device> deviceCollection;
         private readonly IMongoCollection<DataSet> dataSetCollection;

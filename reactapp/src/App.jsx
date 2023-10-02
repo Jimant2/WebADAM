@@ -1,6 +1,7 @@
 // eslint-disable-next-line no-unused-vars
 import React, { Component } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import GraphVisualization from './Component/GraphVisualization';
+import { fetchDatasetsForDevice, getDevice } from './Controller/APIController';
 
 export default class App extends Component {
     static displayName = App.name;
@@ -13,7 +14,7 @@ export default class App extends Component {
     };
 
     componentDidMount() {
-        this.getDevice();
+        this.getDeviceAndSetState();
     }
 
     renderDevices = (devices) => {
@@ -27,38 +28,26 @@ export default class App extends Component {
         e.preventDefault();
         const deviceName = e.dataTransfer.getData("text/plain");
         console.log("Fetching data for device:", deviceName);
-        await this.fetchDatasetsForDevice(deviceName);
+        await this.fetchDatasetsAndSetState(deviceName);
     }
 
-    fetchDatasetsForDevice = async (deviceName) => {
-        this.setState({ loadingDatasets: true });
-        const response = await fetch(`https://localhost:7074/MainController/dataSetByName/${deviceName}`);
-        if (response.ok) {
-            const dataSets = await response.json();
-            const mappedData = dataSets.flatMap(dataset => (
-                dataset.data.map(dataPoint => ({
-                    timestamp: new Date(dataPoint.timestamp).getTime(),
-                    value: dataPoint.value
-                }))
-            ));
-            mappedData.sort((a, b) => a.timestamp - b.timestamp);
-            this.setState({ currentDatasets: mappedData, loadingDatasets: false });
-        } else {
-            console.error('Failed to fetch datasets:', await response.text());
+    fetchDatasetsAndSetState = async (deviceName) => {
+        try {
+            this.setState({ loadingDatasets: true });
+            const dataSets = await fetchDatasetsForDevice(deviceName);
+            this.setState({ currentDatasets: dataSets, loadingDatasets: false });
+        } catch (error) {
+            console.error(error);
             this.setState({ loadingDatasets: false });
         }
     }
 
-
-
-
-    getDevice = async () => {
-        const response = await fetch('https://localhost:7074/MainController/device');
-        if (response.headers.get("content-type")?.includes("application/json")) {
-            const deviceData = await response.json();
-            this.setState({ devices: deviceData, loadingDevices: false });
-        } else {
-            console.error('Received non-JSON response:', await response.text());
+    getDeviceAndSetState = async () => {
+        try {
+            const devices = await getDevice();
+            this.setState({ devices: devices, loadingDevices: false });
+        } catch (error) {
+            console.error(error);
         }
     }
 
@@ -87,17 +76,7 @@ export default class App extends Component {
                         onDrop={this.handleDropOnGraph}
                         onDragOver={(e) => e.preventDefault()}
                         style={{ width: "100%", height: 300 }}>
-                        <ResponsiveContainer>
-                            <LineChart data={currentDatasets}
-                                margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                                <CartesianGrid strokeDasharray="3 3" />
-                                <XAxis dataKey="timestamp" scale="time" type="number" domain={['auto', 'auto']} tickFormatter={this.formatTimestampToTime} />
-                                <YAxis />
-                                <Tooltip />
-                                <Legend />
-                                <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
-                            </LineChart>
-                        </ResponsiveContainer>
+                        <GraphVisualization data={currentDatasets} formatTimestampToTime={this.formatTimestampToTime} />
                     </div>
                 </div>
             </div>

@@ -16,7 +16,7 @@ function Header() {
 
     return (
         <header>
-            <Button onClick={handleClick}>
+            <Button class="file-Button" onClick={handleClick}>
                 File
             </Button>
             <Menu
@@ -29,7 +29,6 @@ function Header() {
                 <MenuItem onClick={handleClose}>Save</MenuItem>
             </Menu>
 
-            {/* Similar Blocks for Edit and other menu items can be added here */}
 
         </header>
     );

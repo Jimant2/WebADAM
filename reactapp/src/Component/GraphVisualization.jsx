@@ -4,6 +4,10 @@ import PropTypes from 'prop-types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 
 const GraphVisualization = ({ data, formatTimestampToTime }) => {
+    console.log("GraphVisualization data", data);
+    const dataType = data[0]?.dataType || 'value';
+    console.log("DataType:", dataType); // Log the dataType
+
     return (
         <ResponsiveContainer>
             <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -12,11 +16,12 @@ const GraphVisualization = ({ data, formatTimestampToTime }) => {
                 <YAxis />
                 <Tooltip />
                 <Legend />
-                <Line type="monotone" dataKey="value" stroke="#8884d8" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey={dataType} stroke="#8884d8" activeDot={{ r: 8 }} />
             </LineChart>
         </ResponsiveContainer>
     );
 };
+
 
 GraphVisualization.propTypes = {
     data: PropTypes.array.isRequired,

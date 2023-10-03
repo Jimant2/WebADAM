@@ -35,10 +35,8 @@ export default class App extends Component {
         console.log(`Fetching data for graph ${index + 1}, device:`, deviceName);
         try {
             this.setState({ loadingDatasets: true });
-            const { data, dataType } = await fetchDatasetsForDevice(deviceName); // Destructure the returned object
+            const { data, dataType } = await fetchDatasetsForDevice(deviceName);
             console.log('Fetched data:', data);
-
-            // Since the data is already transformed in fetchDatasetsForDevice, you don't need to transform it again
             const transformedData = data;
 
             console.log("Transformed Data:", transformedData);
@@ -53,10 +51,6 @@ export default class App extends Component {
             this.setState({ loadingDatasets: false });
         }
     }
-
-
-
-
 
     fetchDatasetsAndSetState = async (deviceName) => {
         try {
@@ -96,6 +90,7 @@ export default class App extends Component {
                                 {device.deviceName}
                             </div>
                         ))}
+
                     </div>
                     <div className="graphs-container">
                         {deviceContent}

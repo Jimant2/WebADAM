@@ -10,7 +10,7 @@ export default class App extends Component {
     static displayName = App.name;
 
     state = {
-        datasets: [[], []],
+        datasets: [{ data: [], dataType: '' }, { data: [], dataType: '' }],
         devices: [],
         loadingDevices: true,
         loadingDatasets: false,
@@ -27,30 +27,35 @@ export default class App extends Component {
         const date = new Date(timestamp);
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
     }
+
+
     handleDropOnGraph = (index) => async (e) => {
         e.preventDefault();
         const deviceName = e.dataTransfer.getData("text/plain");
         console.log(`Fetching data for graph ${index + 1}, device:`, deviceName);
         try {
             this.setState({ loadingDatasets: true });
-            const dataSets = await fetchDatasetsForDevice(deviceName);
-            console.log('Fetched data:', dataSets);
-            // Check if dataSets.Data is defined and is an array before calling .map()
-            const transformedData = Array.isArray(dataSets.Data) ? dataSets.Data.map(dataPoint => ({
-                ...dataPoint,
-                dataType: dataSets.dataType,
-            })) : [];
+            const { data, dataType } = await fetchDatasetsForDevice(deviceName); // Destructure the returned object
+            console.log('Fetched data:', data);
+
+            // Since the data is already transformed in fetchDatasetsForDevice, you don't need to transform it again
+            const transformedData = data;
+
+            console.log("Transformed Data:", transformedData);
 
             this.setState(prevState => {
                 const newDatasets = [...prevState.datasets];
-                newDatasets[index] = transformedData;
+                newDatasets[index] = { data: transformedData, dataType: dataType };
                 return { datasets: newDatasets, loadingDatasets: false };
-            });
+            }); 
         } catch (error) {
             console.error(error);
             this.setState({ loadingDatasets: false });
         }
     }
+
+
+
 
 
     fetchDatasetsAndSetState = async (deviceName) => {
@@ -97,12 +102,12 @@ export default class App extends Component {
                         <div className="graph"
                             onDrop={this.handleDropOnGraph(0)} // Pass the index here
                             onDragOver={(e) => e.preventDefault()}>
-                            <GraphVisualization data={datasets[0]} formatTimestampToTime={this.formatTimestampToTime} dataType="dataType" />
+                            <GraphVisualization data={datasets[0].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[0].dataType || "value"} />
                         </div>
                         <div className="graph"
                             onDrop={this.handleDropOnGraph(1)} // Pass the index here
                             onDragOver={(e) => e.preventDefault()}>
-                            <GraphVisualization data={datasets[1]} formatTimestampToTime={this.formatTimestampToTime} dataType="dataType" />
+                            <GraphVisualization data={datasets[1].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[1].dataType || "value"} />
                         </div>
                     </div>
                 </div>

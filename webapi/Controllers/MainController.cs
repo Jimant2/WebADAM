@@ -8,6 +8,8 @@ using System.Text;
 using webapi.DataRepos;
 using webapi.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
+using Swashbuckle.AspNetCore.SwaggerGen;
+using Newtonsoft.Json.Linq;
 
 namespace webapi.Controllers;
 
@@ -43,6 +45,7 @@ public class MainController : ControllerBase
         return Ok(data);
     }
 
+
     [HttpPost("upload")]
     public async Task<IActionResult> UploadFile(IFormFile file, string deviceName, string dataType)
     {
@@ -72,22 +75,43 @@ public class MainController : ControllerBase
             {
                 var jsonString = await reader.ReadToEndAsync();
 
-                // Deserialize the JSON as an array
-                var jsonArray = BsonSerializer.Deserialize<BsonArray>(jsonString);
+                // Parse JSON using JArray 
+                var jsonArray = JArray.Parse(jsonString);
 
-                // Create a list to store all the DataSet documents
                 var dataSetList = new List<DataSet>();
 
-                // Iterate over each element in the array
+                // Iterate over elements in the JSON array
                 foreach (var jsonDocument in jsonArray)
                 {
-                    var time = jsonDocument["Time"].ToString();
-                    var ecgWaveform = jsonDocument["EcgWaveform"].AsInt32;
+                    // Convert JSON object to dictionary
+                    var properties = jsonDocument.ToObject<Dictionary<string, object>>();
 
+                    // Iterate through the properties and find the first integer value
+                    int value = 0;
+                    foreach (var property in properties.Values)
+                    {
+                        if (property is int intValue)
+                        {
+                            value = intValue;
+                            break;
+                        }
+                        else if (property is long longValue)
+                        {
+                            value = (int)longValue;
+                            break;
+                        }
+                        else if (property is double doubleValue)
+                        {
+                            value = (int)doubleValue;
+                            break;
+                        }
+                    }
+
+                    // Create a new Data object
                     var newDataDocument = new Data
                     {
                         timestamp = DateTime.UtcNow,
-                        value = ecgWaveform
+                        value = value
                     };
 
                     var newDataSetDocument = new DataSet
@@ -102,7 +126,6 @@ public class MainController : ControllerBase
                     dataSetList.Add(newDataSetDocument);
                 }
 
-                // Insert all the DataSet documents in a single database call
                 await _repository.InsertDataSetAsync(dataSetList);
 
                 return Ok("File uploaded, and data added to the DataSet.");
@@ -110,10 +133,12 @@ public class MainController : ControllerBase
         }
         catch (Exception ex)
         {
-            // Handle exceptions here
-            return StatusCode(500, "Internal server error.");
+            Console.WriteLine($"Exception: {ex.Message}");
+            Console.WriteLine($"StackTrace: {ex.StackTrace}");
+            return StatusCode(500, "Internal server error. Please check server logs for more details.");
         }
     }
+
 
     [HttpGet("exportData/{deviceName}")]
     public async Task<IActionResult> ExportData(string deviceName)

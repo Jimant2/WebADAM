@@ -46,23 +46,14 @@ public class MainController : ControllerBase
     }
 
 
-    [HttpPost("upload")]
+    [HttpPost("uploadFile")]
+    [RequestSizeLimit(100_000_000)]
     public async Task<IActionResult> UploadFile(IFormFile file, string deviceName, string dataType)
     {
-        if (file == null || file.Length == 0)
-        {
-            return BadRequest("File is not provided.");
-        }
 
-        if (string.IsNullOrEmpty(deviceName))
-        {
-            return BadRequest("Device name is required.");
-        }
-
-        if (string.IsNullOrEmpty(dataType))
-        {
-            return BadRequest("Data type is required.");
-        }
+        Console.WriteLine($"Received file: {file?.FileName}");
+        Console.WriteLine($"Received deviceName: {deviceName}");
+        Console.WriteLine($"Received dataType: {dataType}");
 
         try
         {

@@ -28,7 +28,6 @@ export default class App extends Component {
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
     }
 
-
     handleDropOnGraph = (index) => async (e) => {
         e.preventDefault();
         const deviceName = e.dataTransfer.getData("text/plain");

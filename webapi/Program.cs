@@ -30,16 +30,19 @@ builder.Services.AddCors(options =>
     options.AddPolicy(name: "MyAllowSpecificOrigins",
                       builder =>
                       {
-                          builder.WithOrigins("https://localhost:5173") // your React app's origin
+                          builder.WithOrigins("https://localhost:5173")
                                  .AllowAnyHeader()
-                                 .AllowAnyMethod();
+                                 .AllowAnyMethod()
+                                 .AllowCredentials();
                       });
 });
 
+builder.Services.AddControllers();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+app.UseRouting();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

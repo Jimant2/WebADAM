@@ -22,8 +22,6 @@ namespace webapi.DataRepos
             return dataLoaderCollection.Find(_ => true).ToList();
         }
 
-        //CRUD Operations for Device
-
         public List<Device> GetDevice()
         {
             return deviceCollection.Find(_ => true).ToList();
@@ -38,8 +36,6 @@ namespace webapi.DataRepos
         {
             return await deviceCollection.Find(d => d.deviceName == deviceName).FirstOrDefaultAsync();
         }
-
-        // CRUD operations for DataSet collection
 
         public List<DataSet> GetDataSet()
         {
@@ -62,7 +58,6 @@ namespace webapi.DataRepos
 
             return await dataSetCollection.Find(ds => ds.deviceId == device._id).ToListAsync();
 
-            // Implement other CRUD methods as needed
         }
     }
 }

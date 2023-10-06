@@ -4,7 +4,7 @@ import React from 'react';
 function Footer() {
     return (
         <footer>
-            <p>© 2023 My Data App. All rights reserved.</p>
+            <p>© 2023 WebADAM. All rights reserved.</p>
         </footer>
     );
 }

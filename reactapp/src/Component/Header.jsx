@@ -26,7 +26,10 @@ function Header() {
 
     const handleFileChange = async (e) => {
         const file = e.target.files[0];
-        if (!file) return;
+        if (!file) {
+            console.error("No file selected");
+            return;
+        }
 
         const deviceName = window.prompt('Please enter the device name:');
         if (!deviceName || deviceName.trim() === '') {
@@ -41,23 +44,28 @@ function Header() {
         }
 
         const formData = new FormData();
-        formData.set('file', file);
-        formData.set('deviceName', deviceName);
-        formData.set('dataType', dataType);
+        formData.append('file', file);
+
+        const requestUrl = `https://localhost:7074/MainController/uploadFile?deviceName=${encodeURIComponent(deviceName)}&dataType=${encodeURIComponent(dataType)}`;
+
         try {
-            const response = await fetch('https://localhost:7074/MainController/upload', {
+            const response = await fetch(requestUrl, {
                 method: 'POST',
                 body: formData,
             });
-            console.log(formData.file);
 
             if (response.ok) {
                 console.log('File uploaded successfully');
+                alert("File uploaded!")
             } else {
-                console.error('Error uploading file:', await response.json());
+                console.error('Error response:', response);
+                const errorData = await response.json();
+                console.error('Error data:', errorData);
+                alert(`Error uploading file: ${errorData.message || 'Unknown error'}`);
             }
         } catch (error) {
             console.error('Error uploading file:', error);
+            alert(`Error uploading file: ${error.message}`);
         }
     };
 

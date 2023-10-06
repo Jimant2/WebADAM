@@ -47,7 +47,6 @@ public class MainController : ControllerBase
 
 
     [HttpPost("uploadFile")]
-    [RequestSizeLimit(100_000_000)]
     public async Task<IActionResult> UploadFile(IFormFile file, string deviceName, string dataType)
     {
 
@@ -74,6 +73,8 @@ public class MainController : ControllerBase
                 // Iterate over elements in the JSON array
                 foreach (var jsonDocument in jsonArray)
                 {
+                    var timestampValue = jsonDocument["Time"].ToObject<DateTime>();
+
                     // Convert JSON object to dictionary
                     var properties = jsonDocument.ToObject<Dictionary<string, object>>();
 
@@ -101,7 +102,7 @@ public class MainController : ControllerBase
                     // Create a new Data object
                     var newDataDocument = new Data
                     {
-                        timestamp = DateTime.UtcNow,
+                        timestamp = timestampValue,
                         value = value
                     };
 

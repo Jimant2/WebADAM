@@ -2,7 +2,7 @@
 // eslint-disable-next-line no-unused-vars
 import React from 'react';
 import PropTypes from 'prop-types';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Brush } from 'recharts';
 
 const GraphVisualization = ({ data, dataType, formatTimestampToTime }) => {
     console.log("Received Data:", data, "DataType:", dataType);
@@ -33,6 +33,7 @@ const GraphVisualization = ({ data, dataType, formatTimestampToTime }) => {
                 <Tooltip content={<CustomTooltip />} /> {/* Use the CustomTooltip here */}
                 <Legend />
                 <Line type="monotone" dataKey={dataType} stroke="#8884d8" activeDot={{ r: 8 }} />
+                <Brush dataKey="timestamp" height={30} stroke="#8884d8" tickFormatter={formatTimestampToTime} />
             </LineChart>
         </ResponsiveContainer>
     );

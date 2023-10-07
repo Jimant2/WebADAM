@@ -14,6 +14,7 @@ export default class App extends Component {
         devices: [],
         loadingDevices: true,
         loadingDatasets: false,
+        aggregationInterval: 60 * 1000,
     };
 
     componentDidMount() {
@@ -27,7 +28,6 @@ export default class App extends Component {
         const date = new Date(timestamp);
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
     }
-
     handleDropOnGraph = (index) => async (e) => {
         e.preventDefault();
         const deviceName = e.dataTransfer.getData("text/plain");
@@ -37,19 +37,31 @@ export default class App extends Component {
             const { data, dataType } = await fetchDatasetsForDevice(deviceName);
             console.log('Fetched data:', data);
 
-            // Filter the data to remove consecutive data points with the same value
-            const filteredData = data.reduce((acc, curr, idx, arr) => {
-                if (idx === 0 || curr[dataType] !== arr[idx - 1][dataType]) {
-                    acc.push(curr);
-                }
-                return acc;
-            }, []);
+            // Aggregate the data based on the selected interval
+            const interval = this.state.aggregationInterval;
+            const aggregatedData = [];
+            const dataByInterval = {};
 
-            console.log("Transformed Data:", filteredData);
+            data.forEach(point => {
+                const intervalKey = Math.floor(point.timestamp / interval) * interval; // Group by the selected interval
+
+                if (!dataByInterval[intervalKey]) {
+                    dataByInterval[intervalKey] = [];
+                }
+                dataByInterval[intervalKey].push(point);
+            });
+
+            for (const intervalStart in dataByInterval) {
+                const points = dataByInterval[intervalStart];
+                const avgValue = points.reduce((sum, point) => sum + point[dataType], 0) / points.length;
+                aggregatedData.push({ timestamp: Number(intervalStart), [dataType]: avgValue });
+            }
+
+            console.log("Aggregated Data:", aggregatedData);
 
             this.setState(prevState => {
                 const newDatasets = [...prevState.datasets];
-                newDatasets[index] = { data: filteredData, dataType: dataType };
+                newDatasets[index] = { data: aggregatedData, dataType: dataType };
                 return { datasets: newDatasets, loadingDatasets: false };
             });
         } catch (error) {
@@ -57,6 +69,8 @@ export default class App extends Component {
             this.setState({ loadingDatasets: false });
         }
     }
+
+
 
 
     fetchDatasetsAndSetState = async (deviceName) => {
@@ -88,6 +102,7 @@ export default class App extends Component {
             <div className="app-container">
                 <Header />
                 <div className="content-container">
+                    
                     <div className="devices-container">
                         {devices.map(device => (
                             <div key={device.id}
@@ -97,10 +112,23 @@ export default class App extends Component {
                                 {device.deviceName}
                             </div>
                         ))}
-
+                        
                     </div>
+                    
                     <div className="graphs-container">
                         {deviceContent}
+                        <div className="aggregation-dropdown">
+                            <label>Interval: </label>
+                            <select
+                                value={this.state.aggregationInterval}
+                                onChange={(e) => this.setState({ aggregationInterval: Number(e.target.value) })}
+                            >
+                                <option value={5 * 1000}>5 seconds</option>
+                                <option value={30 * 1000}>30 seconds</option>
+                                <option value={60 * 1000}>1 minute</option>
+                                {/* Add more options as needed */}
+                            </select>
+                        </div>
                         <div className="graph"
                             onDrop={this.handleDropOnGraph(0)} // Pass the index here
                             onDragOver={(e) => e.preventDefault()}>
@@ -112,6 +140,7 @@ export default class App extends Component {
                             <GraphVisualization data={datasets[1].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[1].dataType || "value"} />
                         </div>
                     </div>
+                    
                 </div>
                 <Footer />
             </div>

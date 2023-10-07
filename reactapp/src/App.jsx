@@ -36,20 +36,28 @@ export default class App extends Component {
             this.setState({ loadingDatasets: true });
             const { data, dataType } = await fetchDatasetsForDevice(deviceName);
             console.log('Fetched data:', data);
-            const transformedData = data;
 
-            console.log("Transformed Data:", transformedData);
+            // Filter the data to remove consecutive data points with the same value
+            const filteredData = data.reduce((acc, curr, idx, arr) => {
+                if (idx === 0 || curr[dataType] !== arr[idx - 1][dataType]) {
+                    acc.push(curr);
+                }
+                return acc;
+            }, []);
+
+            console.log("Transformed Data:", filteredData);
 
             this.setState(prevState => {
                 const newDatasets = [...prevState.datasets];
-                newDatasets[index] = { data: transformedData, dataType: dataType };
+                newDatasets[index] = { data: filteredData, dataType: dataType };
                 return { datasets: newDatasets, loadingDatasets: false };
-            }); 
+            });
         } catch (error) {
             console.error(error);
             this.setState({ loadingDatasets: false });
         }
     }
+
 
     fetchDatasetsAndSetState = async (deviceName) => {
         try {

@@ -28,6 +28,7 @@ export default class App extends Component {
         const date = new Date(timestamp);
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
     }
+
     handleDropOnGraph = (index) => async (e) => {
         e.preventDefault();
         const deviceName = e.dataTransfer.getData("text/plain");
@@ -53,7 +54,7 @@ export default class App extends Component {
 
             for (const intervalStart in dataByInterval) {
                 const points = dataByInterval[intervalStart];
-                const avgValue = points.reduce((sum, point) => sum + point[dataType], 0) / points.length;
+                const avgValue = Math.round(points.reduce((sum, point) => sum + point[dataType], 0) / points.length);
                 aggregatedData.push({ timestamp: Number(intervalStart), [dataType]: avgValue });
             }
 

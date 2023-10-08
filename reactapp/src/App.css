@@ -83,3 +83,8 @@
 .file-Button {
     border: 3px solid #ccc;
 }
+.custom-tooltip {
+    background-color: rgba(0,0,0,.5);
+    color: #fff;
+    border: 2px solid #ccc
+}

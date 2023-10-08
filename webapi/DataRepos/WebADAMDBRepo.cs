@@ -57,7 +57,6 @@ namespace webapi.DataRepos
             if (device == null) return new List<DataSet>();
 
             return await dataSetCollection.Find(ds => ds.deviceId == device._id).ToListAsync();
-
         }
     }
 }

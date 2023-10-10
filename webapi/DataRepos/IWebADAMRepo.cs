@@ -1,4 +1,4 @@
-﻿using webapi.Models;
+﻿using webapi.DataModels;
 
 namespace webapi.DataRepos
 {

@@ -1,6 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 
-namespace webapi.DataModels
+namespace webapi.Models
 {
     public class Data
     {

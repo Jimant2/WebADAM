@@ -6,7 +6,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text;
 using webapi.DataRepos;
-using webapi.DataModels;
+using webapi.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json.Linq;

@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson;
 using MongoDB.Bson.Serialization.Attributes;
 
-namespace webapi.DataModels
+namespace webapi.Models
 {
     public class ECG
     {

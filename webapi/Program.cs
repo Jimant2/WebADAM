@@ -1,7 +1,5 @@
-using Microsoft.AspNetCore.Authentication.Cookies;
 using MongoDB.Driver;
 using webapi.DataRepos;
-using webapi.Services;
 //using webapi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -26,7 +24,6 @@ var mongoDatabase = mongoClient.GetDatabase(databaseName);
 
 builder.Services.AddSingleton<IMongoClient>(mongoClient);
 builder.Services.AddSingleton<IMongoDatabase>(mongoDatabase);
-builder.Services.AddSingleton<IUserLicenseService, UserLicenseService>();
 builder.Services.AddScoped<WebADAMDBRepo>();
 builder.Services.AddCors(options =>
 {
@@ -42,28 +39,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
-builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-    .AddCookie(options =>
-    {
-        options.LoginPath = "/AuthController/login";
-        options.LogoutPath = "/AuthController/logout";
-        options.AccessDeniedPath = "/AuthController/accessdenied"; // Optional: Customize access denied path
-        options.Events.OnRedirectToLogin = context =>
-        {
-            context.Response.StatusCode = 401; // Unauthorized status code
-            return Task.CompletedTask;
-        };
-    });
-
-builder.Services.AddDistributedMemoryCache();
-
-builder.Services.AddSession(options =>
-{
-    options.IdleTimeout = TimeSpan.FromMinutes(60); // Set your desired session duration
-    options.Cookie.HttpOnly = true;
-    options.Cookie.IsEssential = true;
-});
-
 var app = builder.Build();
 
 app.UseRouting();
@@ -77,7 +52,6 @@ app.UseCors("MyAllowSpecificOrigins");
 
 app.UseHttpsRedirection();
 
-app.UseAuthentication(); // Use authentication before UseAuthorization
 app.UseAuthorization();
 
 app.MapControllers();

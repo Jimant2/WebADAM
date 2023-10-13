@@ -1,7 +1,7 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using MongoDB.Bson;
 
-namespace webapi.DataModels
+namespace webapi.Models
 {
     public class DataSet
     {

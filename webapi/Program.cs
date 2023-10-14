@@ -1,5 +1,6 @@
 using MongoDB.Driver;
 using webapi.DataRepos;
+using webapi.Services;
 //using webapi.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -24,7 +25,10 @@ var mongoDatabase = mongoClient.GetDatabase(databaseName);
 
 builder.Services.AddSingleton<IMongoClient>(mongoClient);
 builder.Services.AddSingleton<IMongoDatabase>(mongoDatabase);
-builder.Services.AddScoped<WebADAMDBRepo>();
+builder.Services.AddScoped<IWebADAMRepo, WebADAMRepo>();
+builder.Services.AddScoped<IDataService, DataService>();
+builder.Services.AddScoped<IDeviceService, DeviceService>();
+builder.Services.AddScoped<ILicenseService, LicenseService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "MyAllowSpecificOrigins",

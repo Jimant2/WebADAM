@@ -5,14 +5,14 @@ using webapi.Models;
 
 namespace webapi.DataRepos
 {
-    public class WebADAMDBRepo : IWebADAMRepo
+    public class WebADAMRepo : IWebADAMRepo
     {
         private readonly IMongoCollection<Device> deviceCollection;
         private readonly IMongoCollection<DataSet> dataSetCollection;
         private readonly IMongoCollection<DataLoader> dataLoaderCollection;
         private readonly IMongoCollection<Users> usersCollection;
 
-        public WebADAMDBRepo(IMongoDatabase database)
+        public WebADAMRepo(IMongoDatabase database)
         {
             deviceCollection = database.GetCollection<Device>("Device");
             dataSetCollection = database.GetCollection<DataSet>("DataSet");

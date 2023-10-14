@@ -5,8 +5,8 @@ using MongoDB.Driver;
 using System.Globalization;
 using System.Text.Json;
 using System.Text;
-using webapi.DataRepos;
 using webapi.Models;
+using webapi.Services;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json.Linq;
@@ -14,6 +14,8 @@ using Newtonsoft.Json;
 using System.Xml;
 using webapi.LicenseModels;
 using System.Xml.Serialization;
+using System.Security.Cryptography;
+
 
 namespace webapi.Controllers;
 
@@ -21,117 +23,52 @@ namespace webapi.Controllers;
 [Route("MainController")]
 public class MainController : ControllerBase
 {
-    private readonly WebADAMDBRepo _repository;
+    private ILicenseService licenseService { get; set; }
+    private IDeviceService deviceService { get; set; }
+    private IDataService dataService { get; set; }
 
-    public MainController(WebADAMDBRepo repository)
+    public MainController(ILicenseService _licenseService, IDeviceService _deviceService, IDataService _dataService)
     {
-        _repository = repository;
+        licenseService = _licenseService;
+        deviceService = _deviceService;
+        dataService = _dataService;
     }
 
     [HttpGet("device")]
-    public ActionResult<IEnumerable<Device>> GetDevice()
+    public ActionResult<List<Device>> GetDevice()
     {
-        var data = _repository.GetDevice();
-        return Ok(data);
-    }
+       var device = deviceService.GetDeviceNameFromService();
+       return Ok(device);
+}
 
     [HttpGet("dataSetByName/{deviceName}")]
     public async Task<ActionResult<IEnumerable<DataSet>>> GetDataSet(string deviceName)
     {
-        var data = await _repository.GetDataSetsByDeviceNameAsync(deviceName);
+        var data = await dataService.GetDataSetsByDeviceNameFromService(deviceName);
         return Ok(data);
     }
 
-    [HttpGet("dataLoader")]
-    public ActionResult<IEnumerable<DataLoader>> GetDataLoader()
-    {
-        var data = _repository.GetDataLoader();
-        return Ok(data);
-    }
-
+    //[HttpGet("dataLoader")]
+    //public ActionResult<IEnumerable<DataLoader>> GetDataLoader()
+    //{
+    //    var data = _repository.GetDataLoader();
+    //    return Ok(data); 
+    //}
 
     [HttpPost("uploadFile")]
     public async Task<IActionResult> UploadFile(IFormFile file, string deviceName, string dataType)
     {
-
         Console.WriteLine($"Received file: {file?.FileName}");
         Console.WriteLine($"Received deviceName: {deviceName}");
         Console.WriteLine($"Received dataType: {dataType}");
-
-        try
-        {
-            DateTime date1 = DateTime.Now;
-            var currentTime = date1.AddHours(2);
-
-            var existingDevice = await _repository.GetDeviceByNameAsync(deviceName);
-
-            using (var reader = new StreamReader(file.OpenReadStream()))
-            {
-                var jsonString = await reader.ReadToEndAsync();
-
-                // Parse JSON using JArray 
-                var jsonArray = JArray.Parse(jsonString);
-
-                var dataSetList = new List<DataSet>();
-
-                // Iterate over elements in the JSON array
-                foreach (var jsonDocument in jsonArray)
-                {
-                    var timestampValue = jsonDocument["Time"].ToObject<DateTime>();
-
-                    // Convert JSON object to dictionary
-                    var properties = jsonDocument.ToObject<Dictionary<string, object>>();
-
-                    // Iterate through the properties and find the first integer value
-                    int value = 0;
-                    foreach (var property in properties.Values)
-                    {
-                        if (property is int intValue)
-                        {
-                            value = intValue;
-                            break;
-                        }
-                        else if (property is long longValue)
-                        {
-                            value = (int)longValue;
-                            break;
-                        }
-                        else if (property is double doubleValue)
-                        {
-                            value = (int)doubleValue;
-                            break;
-                        }
-                    }
-
-                    // Create a new Data object
-                    var newDataDocument = new Data
-                    {
-                        timestamp = timestampValue,
-                        value = value
-                    };
-
-                    var newDataSetDocument = new DataSet
-                    {
-                        deviceId = existingDevice._id,
-                        timestamp = currentTime,
-                        dataType = dataType,
-                        Data = new List<Data> { newDataDocument }
-                    };
-
-                    // Add the new DataSet document to the list
-                    dataSetList.Add(newDataSetDocument);
-                }
-
-                await _repository.InsertDataSetAsync(dataSetList);
-
-                return Ok("File uploaded, and data added to the DataSet.");
-            }
+        try { 
+        await dataService.UploadFileFromService(file, deviceName, dataType);
+        return Ok("File uploaded");
         }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception: {ex.Message}");
-            Console.WriteLine($"StackTrace: {ex.StackTrace}");
-            return StatusCode(500, "Internal server error. Please check server logs for more details.");
+        catch (Exception ex) 
+        { 
+            Console.WriteLine(ex.Message );
+            return BadRequest(ex.Message );
         }
     }
 
@@ -149,23 +86,10 @@ public class MainController : ControllerBase
                     XmlSerializer serializer = new XmlSerializer(typeof(License));
                     License license = (License)serializer.Deserialize(streamReader);
 
-
-                    Users user = new Users
-                    {
-                        // Assuming LicenseXml property in Users class is of type LicenseModels.License
-                        LicenseXml = license,
-                        // Map other properties from LicenseModels.License to Users class as needed
-                        Password = license.User.Password, // Set password here if available in license object
-                        Username = license.User.UserName // Set username here if available in license object
-                    };
-                    await _repository.AddLicenseXmlAsync(user);
-
+                    await licenseService.SaveLicensedUserFromService(license);
                     return Ok("XML uploaded successfully");
                 }
-
-               
             }
-
             return BadRequest("Invalid or missing XML file.");
         }
         catch (Exception ex)
@@ -185,7 +109,7 @@ public class MainController : ControllerBase
             }
 
             // Retrieve the data from the database based on deviceName
-            var dataSets = await _repository.GetDataSetsByDeviceNameAsync(deviceName);
+            var dataSets = await dataService.GetDataSetsByDeviceNameFromService(deviceName);
 
             if (!dataSets.Any())
             {

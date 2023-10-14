@@ -1,28 +1,27 @@
 ﻿using System.Xml.Serialization;
+using webapi.LicenseModels;
 
 namespace webapi.LicenseModels
 {
+    [XmlRoot("License")]
     public class License
     {
-        [XmlElement(ElementName = "User")]
-        public LicenseUser User { get; set; }
-
-        [XmlElement(ElementName = "Roles")]
-        public LicenseRoles Roles { get; set; }
-
-        [XmlElement(ElementName = "Features")]
-        public LicenseFeatures Features { get; set; }
-
-        [XmlElement(ElementName = "ChannelRestrictions")]
-        public LicenseDeviceCollection ChannelRestrictions { get; set; }
-
-        [XmlAttribute(AttributeName = "Author")]
+        [XmlAttribute("Author")]
         public string Author { get; set; }
 
-        [XmlAttribute(AttributeName = "Machine")]
+        [XmlAttribute("Machine")]
         public string Machine { get; set; }
 
-        [XmlAttribute(AttributeName = "Group")]
+        [XmlAttribute("Group")]
         public string Group { get; set; }
+
+        public LicenseUser User { get; set; }
+
+        public LicenseRoles Roles { get; set; }
+
+        public LicenseFeatures Features { get; set; }
+
+        [XmlElement("ChannelRestrictions")]
+        public LicenseDeviceCollection ChannelRestrictions { get; set; }
     }
 }

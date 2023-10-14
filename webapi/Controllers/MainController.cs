@@ -13,6 +13,7 @@ using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System.Xml;
 using webapi.LicenseModels;
+using System.Xml.Serialization;
 
 namespace webapi.Controllers;
 
@@ -141,36 +142,22 @@ public class MainController : ControllerBase
         try
         {
             // Check if a file is uploaded
-            if (licenseFile != null && licenseFile.Length > 0 && licenseFile.ContentType == "application/xml")
+            if (licenseFile != null && licenseFile.Length > 0 && licenseFile.ContentType == "text/xml")
             {
-                // Read the XML data from the uploaded file
-                using (var reader = new StreamReader(licenseFile.OpenReadStream()))
+                using (var streamReader = new StreamReader(licenseFile.OpenReadStream()))
                 {
-                    var xmlData = await reader.ReadToEndAsync();
+                    XmlSerializer serializer = new XmlSerializer(typeof(License));
+                    License license = (License)serializer.Deserialize(streamReader);
 
-                    // Convert XML to JSON
-                    var xmlDoc = new XmlDocument();
-                    xmlDoc.LoadXml(xmlData);
-                    var json = JsonConvert.SerializeXmlNode(xmlDoc);
 
-                    // Deserialize the JSON to LicenseModels.License
-                    License license = JsonConvert.DeserializeObject<License>(json);  
-
-                    // Create a new Users object and map the properties from LicenseModels.License
                     Users user = new Users
                     {
                         // Assuming LicenseXml property in Users class is of type LicenseModels.License
                         LicenseXml = license,
                         // Map other properties from LicenseModels.License to Users class as needed
-                        Password = "pass", // Set password here if available in license object
-                        Username = "user432" // Set username here if available in license object
-
-                        // ...
+                        Password = license.User.Password, // Set password here if available in license object
+                        Username = license.User.UserName // Set username here if available in license object
                     };
-
-                    await _repository.AddLicenseXmlAsync(user);
-
-                    return Ok("License added successfully.");
                 }
             }
 

@@ -158,7 +158,12 @@ public class MainController : ControllerBase
                         Password = license.User.Password, // Set password here if available in license object
                         Username = license.User.UserName // Set username here if available in license object
                     };
+                    await _repository.AddLicenseXmlAsync(user);
+
+                    return Ok("XML uploaded successfully");
                 }
+
+               
             }
 
             return BadRequest("Invalid or missing XML file.");

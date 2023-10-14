@@ -10,6 +10,9 @@ using webapi.Models;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 using Swashbuckle.AspNetCore.SwaggerGen;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System.Xml;
+using webapi.LicenseModels;
 
 namespace webapi.Controllers;
 
@@ -131,6 +134,53 @@ public class MainController : ControllerBase
         }
     }
 
+    [HttpPost]
+    [Route("uploadLicense")]
+    public async Task<IActionResult> UploadLicense(IFormFile licenseFile)
+    {
+        try
+        {
+            // Check if a file is uploaded
+            if (licenseFile != null && licenseFile.Length > 0 && licenseFile.ContentType == "application/xml")
+            {
+                // Read the XML data from the uploaded file
+                using (var reader = new StreamReader(licenseFile.OpenReadStream()))
+                {
+                    var xmlData = await reader.ReadToEndAsync();
+
+                    // Convert XML to JSON
+                    var xmlDoc = new XmlDocument();
+                    xmlDoc.LoadXml(xmlData);
+                    var json = JsonConvert.SerializeXmlNode(xmlDoc);
+
+                    // Deserialize the JSON to LicenseModels.License
+                    License license = JsonConvert.DeserializeObject<License>(json);  
+
+                    // Create a new Users object and map the properties from LicenseModels.License
+                    Users user = new Users
+                    {
+                        // Assuming LicenseXml property in Users class is of type LicenseModels.License
+                        LicenseXml = license,
+                        // Map other properties from LicenseModels.License to Users class as needed
+                        Password = "pass", // Set password here if available in license object
+                        Username = "user432" // Set username here if available in license object
+
+                        // ...
+                    };
+
+                    await _repository.AddLicenseXmlAsync(user);
+
+                    return Ok("License added successfully.");
+                }
+            }
+
+            return BadRequest("Invalid or missing XML file.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "Internal server error.");
+        }
+    }
 
     [HttpGet("exportData/{deviceName}")]
     public async Task<IActionResult> ExportData(string deviceName)
@@ -151,7 +201,7 @@ public class MainController : ControllerBase
             }
 
             // Serialize the data to JSON
-            var jsonString = JsonSerializer.Serialize(dataSets);
+            var jsonString = System.Text.Json.JsonSerializer.Serialize(dataSets);
 
             // Create a byte array of the JSON string
             var jsonBytes = Encoding.UTF8.GetBytes(jsonString);

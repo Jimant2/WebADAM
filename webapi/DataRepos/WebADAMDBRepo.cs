@@ -1,4 +1,6 @@
 ﻿using MongoDB.Driver;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using webapi.Models;
 
 namespace webapi.DataRepos
@@ -8,12 +10,14 @@ namespace webapi.DataRepos
         private readonly IMongoCollection<Device> deviceCollection;
         private readonly IMongoCollection<DataSet> dataSetCollection;
         private readonly IMongoCollection<DataLoader> dataLoaderCollection;
+        private readonly IMongoCollection<Users> usersCollection;
 
         public WebADAMDBRepo(IMongoDatabase database)
         {
             deviceCollection = database.GetCollection<Device>("Device");
             dataSetCollection = database.GetCollection<DataSet>("DataSet");
             dataLoaderCollection = database.GetCollection<DataLoader>("DataLoader");
+            usersCollection = database.GetCollection<Users>("Users");
         }
 
 
@@ -44,6 +48,11 @@ namespace webapi.DataRepos
         public async Task<List<DataSet>> GetAllDataSetsAsync()
         {
             return await dataSetCollection.Find(_ => true).ToListAsync();
+        }
+
+        public async Task AddLicenseXmlAsync(Users user)
+        {
+            await usersCollection.InsertOneAsync(user);
         }
 
         public async Task InsertDataSetAsync(List<DataSet> dataSet)

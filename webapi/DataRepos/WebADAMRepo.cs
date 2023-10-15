@@ -41,6 +41,11 @@ namespace webapi.DataRepos
             return await deviceCollection.Find(d => d.deviceName == deviceName).FirstOrDefaultAsync();
         }
 
+        public async Task<Device> GetDeviceByValueTypeAsync(string valueType)
+        {
+            return await deviceCollection.Find(d => d.valueType == valueType).FirstOrDefaultAsync();
+        }
+
         public List<DataSet> GetDataSet()
         {
             return dataSetCollection.Find(_ => true).ToList();

@@ -7,7 +7,7 @@ namespace webapi.Services
         public List<DataSet> GetDataSetFromService();
         public Task InsertDataSetFromService(List<DataSet> dataSet);
         public Task<List<DataSet>> GetDataSetsByDeviceNameFromService(string deviceName);
-        public Task<List<DataSet>> UploadFileFromService(IFormFile file, string deviceName, string dataType);
+        public Task<List<DataSet>> UploadFileFromService(IFormFile file, string dataType);
 
 
     }

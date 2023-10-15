@@ -31,12 +31,6 @@ function Header() {
             return;
         }
 
-        const deviceName = window.prompt('Please enter the device name:');
-        if (!deviceName || deviceName.trim() === '') {
-            alert('Device name is required.');
-            return;
-        }
-
         const dataType = window.prompt('Please enter the data type:');
         if (!dataType || dataType.trim() === '') {
             alert('Data type is required.');
@@ -46,7 +40,7 @@ function Header() {
         const formData = new FormData();
         formData.append('file', file);
 
-        const requestUrl = `https://localhost:7074/MainController/uploadFile?deviceName=${encodeURIComponent(deviceName)}&dataType=${encodeURIComponent(dataType)}`;
+        const requestUrl = `https://localhost:7074/MainController/uploadFile?dataType=${encodeURIComponent(dataType)}`;
 
         try {
             const response = await fetch(requestUrl, {

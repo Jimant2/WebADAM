@@ -56,13 +56,12 @@ public class MainController : ControllerBase
     //}
 
     [HttpPost("uploadFile")]
-    public async Task<IActionResult> UploadFile(IFormFile file, string deviceName, string dataType)
+    public async Task<IActionResult> UploadFile(IFormFile file, string dataType)
     {
         Console.WriteLine($"Received file: {file?.FileName}");
-        Console.WriteLine($"Received deviceName: {deviceName}");
         Console.WriteLine($"Received dataType: {dataType}");
         try { 
-        await dataService.UploadFileFromService(file, deviceName, dataType);
+        await dataService.UploadFileFromService(file, dataType);
         return Ok("File uploaded");
         }
         catch (Exception ex) 

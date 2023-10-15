@@ -25,14 +25,14 @@ namespace webapi.Services
         {
            return await _repository.GetDataSetsByDeviceNameAsync(deviceName);
         }
-        public async Task<List<DataSet>> UploadFileFromService(IFormFile file, string deviceName, string dataType)
+        public async Task<List<DataSet>> UploadFileFromService(IFormFile file, string dataType)
         {
             try
             {
                 DateTime date1 = DateTime.Now;
                 var currentTime = date1.AddHours(2);
 
-                var existingDevice = await _repository.GetDeviceByNameAsync(deviceName);
+                var existingDevice = await _repository.GetDeviceByValueTypeAsync(dataType);
 
                 using (var reader = new StreamReader(file.OpenReadStream()))
                 {

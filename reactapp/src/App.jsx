@@ -124,6 +124,8 @@ export default class App extends Component {
                                 value={this.state.aggregationInterval}
                                 onChange={(e) => this.setState({ aggregationInterval: Number(e.target.value) })}
                             >
+                                <option value={0.5 * 1000}>0.5 seconds</option>
+                                <option value={1 * 1000}>1 seconds</option>
                                 <option value={5 * 1000}>5 seconds</option>
                                 <option value={30 * 1000}>30 seconds</option>
                                 <option value={60 * 1000}>1 minute</option>

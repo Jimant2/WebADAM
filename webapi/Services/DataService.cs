@@ -50,7 +50,20 @@ namespace webapi.Services
                         int value = 0;
                         foreach (var property in record as IDictionary<string, object>)
                         {
-                            if (property.Value is int intValue)
+                            if (property.Value is string stringValue)
+                            {
+                                if (int.TryParse(stringValue, out int parsedIntValue))
+                                {
+                                    value = parsedIntValue;
+                                    break;
+                                }
+                                else if (double.TryParse(stringValue, out double parsedDoubleValue))
+                                {
+                                    value = (int)parsedDoubleValue;
+                                    break;
+                                }
+                            }
+                            else if (property.Value is int intValue)
                             {
                                 value = intValue;
                                 break;

@@ -1,5 +1,8 @@
-﻿using Microsoft.Extensions.Primitives;
+﻿using CsvHelper;
+using CsvHelper.Configuration;
+using Microsoft.Extensions.Primitives;
 using Newtonsoft.Json.Linq;
+using System.Globalization;
 using webapi.DataRepos;
 using webapi.Models;
 
@@ -8,7 +11,7 @@ namespace webapi.Services
     public class DataService : IDataService
     {
         private readonly IWebADAMRepo _repository;
-        public DataService(IWebADAMRepo repository) 
+        public DataService(IWebADAMRepo repository)
         {
             _repository = repository;
         }
@@ -23,7 +26,7 @@ namespace webapi.Services
         }
         public async Task<List<DataSet>> GetDataSetsByDeviceNameFromService(string deviceName)
         {
-           return await _repository.GetDataSetsByDeviceNameAsync(deviceName);
+            return await _repository.GetDataSetsByDeviceNameAsync(deviceName);
         }
         public async Task<List<DataSet>> UploadFileFromService(IFormFile file, string dataType)
         {
@@ -33,47 +36,43 @@ namespace webapi.Services
                 var currentTime = date1.AddHours(2);
 
                 var existingDevice = await _repository.GetDeviceByValueTypeAsync(dataType);
+                var dataSetList = new List<DataSet>();
 
                 using (var reader = new StreamReader(file.OpenReadStream()))
+                using (var csv = new CsvReader(reader, CultureInfo.InvariantCulture))
                 {
-                    var jsonString = await reader.ReadToEndAsync();
-                    // Parse JSON using JArray 
-                    var jsonArray = JArray.Parse(jsonString);
-                    var dataSetList = new List<DataSet>();
-                    // Iterate over elements in the JSON array
-                    foreach (var jsonDocument in jsonArray)
+                    var records = csv.GetRecords<dynamic>();
+
+                    foreach (var record in records)
                     {
-                        var timestampValue = jsonDocument["Time"].ToObject<DateTime>();
+                        var timestampValue = DateTime.Parse(record.Time, CultureInfo.InvariantCulture);
 
-                        // Convert JSON object to dictionary
-                        var properties = jsonDocument.ToObject<Dictionary<string, object>>();
-
-                        // Iterate through the properties and find the first integer value
                         int value = 0;
-                        foreach (var property in properties.Values)
+                        foreach (var property in record as IDictionary<string, object>)
                         {
-                            if (property is int intValue)
+                            if (property.Value is int intValue)
                             {
                                 value = intValue;
                                 break;
                             }
-                            else if (property is long longValue)
+                            else if (property.Value is long longValue)
                             {
                                 value = (int)longValue;
                                 break;
                             }
-                            else if (property is double doubleValue)
+                            else if (property.Value is double doubleValue)
                             {
                                 value = (int)doubleValue;
                                 break;
                             }
                         }
-                        // Create a new Data object
+
                         var newDataDocument = new Data
                         {
                             timestamp = timestampValue,
                             value = value
                         };
+
                         var newDataSetDocument = new DataSet
                         {
                             deviceId = existingDevice._id,
@@ -81,12 +80,13 @@ namespace webapi.Services
                             dataType = dataType,
                             Data = new List<Data> { newDataDocument }
                         };
-                        // Add the new DataSet document to the list
+
                         dataSetList.Add(newDataSetDocument);
                     }
-                    await _repository.InsertDataSetAsync(dataSetList);
-                    return dataSetList;
                 }
+
+                await _repository.InsertDataSetAsync(dataSetList);
+                return dataSetList;
             }
             catch (Exception ex)
             {
@@ -95,5 +95,6 @@ namespace webapi.Services
                 throw;
             }
         }
+
     }
 }

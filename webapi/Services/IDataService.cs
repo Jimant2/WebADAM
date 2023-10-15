@@ -9,6 +9,5 @@ namespace webapi.Services
         public Task<List<DataSet>> GetDataSetsByDeviceNameFromService(string deviceName);
         public Task<List<DataSet>> UploadFileFromService(IFormFile file, string dataType);
 
-
     }
 }

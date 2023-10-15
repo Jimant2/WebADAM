@@ -72,5 +72,10 @@ namespace webapi.DataRepos
 
             return await dataSetCollection.Find(ds => ds.deviceId == device._id).ToListAsync();
         }
+
+        public async Task<Users> FindByUsernameAsync(string username)
+        {
+            return await usersCollection.Find(u => u.Username == username).FirstOrDefaultAsync();
+        }
     }
 }

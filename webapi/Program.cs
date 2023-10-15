@@ -29,6 +29,7 @@ builder.Services.AddScoped<IWebADAMRepo, WebADAMRepo>();
 builder.Services.AddScoped<IDataService, DataService>();
 builder.Services.AddScoped<IDeviceService, DeviceService>();
 builder.Services.AddScoped<ILicenseService, LicenseService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(name: "MyAllowSpecificOrigins",
@@ -40,6 +41,12 @@ builder.Services.AddCors(options =>
                                  .AllowCredentials();
                       });
 });
+builder.Services.AddAuthentication("CookieAuth")
+        .AddCookie("CookieAuth", config =>
+        {
+            config.Cookie.Name = "User.Cookie";
+            config.LoginPath = "/Login";
+        });
 
 builder.Services.AddControllers();
 
@@ -55,6 +62,8 @@ if (app.Environment.IsDevelopment())
 app.UseCors("MyAllowSpecificOrigins");
 
 app.UseHttpsRedirection();
+
+app.UseAuthentication();
 
 app.UseAuthorization();
 

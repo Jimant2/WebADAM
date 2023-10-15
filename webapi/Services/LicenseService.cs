@@ -16,17 +16,10 @@ namespace webapi.Services
             _repository = repository;
 
         }
-        private string HashPassword(string password)
-        {
-            using (SHA256 sha256 = SHA256.Create())
-            {
-                byte[] hashedBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                return BitConverter.ToString(hashedBytes).Replace("-", "").ToLower();
-            }
-        }
+
         public async Task SaveLicensedUserFromService(License license)
         {
-            string hashedPassword = HashPassword(license.User.Password);
+            string hashedPassword = PasswordHasher.HashPassword(license.User.Password);
             Users user = new Users
             {
                 LicenseXml = license,

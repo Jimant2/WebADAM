@@ -28,14 +28,25 @@ namespace webapi.Services
         }
         public async Task AddDeviceDefinitionFromService(Definition definition)
         {
+            Dictionary<string, List<string>> deviceData = new Dictionary<string, List<string>>();
+
+            List<string> valueTypes = new List<string>();
+            foreach (var numericChannel in definition.ChannelDefinition.Channels.NumericChannels)
+            {
+                valueTypes.Add(numericChannel.Name);
+            }
+            deviceData[definition.Name] = valueTypes;
+
             Device device = new Device
             {
                 deviceName = definition.Name,
-                //TODO: Implement channel extracter method to value type
-              //  valueType = definition.
+                valueType = deviceData[definition.Name].ToArray(),
                 channelXml = definition
             };
-             await _repository.AddChannelXmlAsync(device);
+
+            await _repository.AddChannelXmlAsync(device);
         }
+
+
     }
 }

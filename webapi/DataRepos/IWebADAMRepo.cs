@@ -14,8 +14,9 @@ namespace webapi.DataRepos
         public Task InsertDataSetAsync(List<DataSet> dataSet);
         public Task<List<DataSet>> GetDataSetsByDeviceNameAsync(string deviceName);
         public Task AddLicenseXmlAsync(Users user);
-      //  public Task<Device> GetDeviceByValueTypeAsync(string valueType);
+        //public Task<Device> GetDeviceByValueTypeAsync(string valueType);
         public Task<Users> FindByUsernameAsync(string username);
         public Task AddChannelXmlAsync(Device deviceDefinition);
+        public Task<Definition> GetDefinitionByDeviceName(string deviceName);
     }
 }

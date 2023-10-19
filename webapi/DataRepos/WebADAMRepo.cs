@@ -42,10 +42,10 @@ namespace webapi.DataRepos
             return await deviceCollection.Find(d => d.deviceName == deviceName).FirstOrDefaultAsync();
         }
 
-       // public async Task<Device> GetDeviceByValueTypeAsync(string valueType)
-       // {
-       ////     return await deviceCollection.Find(d => d.valueType == valueType).FirstOrDefaultAsync();
-       // }
+        //public async Task<Device> GetDeviceByValueTypeAsync(string[] valueType)
+        //{
+        //    return await deviceCollection.Find(d => d.valueType == valueType).FirstOrDefaultAsync();
+        //}
 
         public List<DataSet> GetDataSet()
         {
@@ -83,5 +83,13 @@ namespace webapi.DataRepos
         {
             return await usersCollection.Find(u => u.Username == username).FirstOrDefaultAsync();
         }
+        public async Task<Definition> GetDefinitionByDeviceNameAsync(string deviceName)
+        {
+            var filter = Builders<Device>.Filter.Eq(d => d.deviceName, deviceName);
+            var device = await deviceCollection.Find(filter).FirstOrDefaultAsync();
+
+            return device?.channelXml;
+        }
+
     }
 }

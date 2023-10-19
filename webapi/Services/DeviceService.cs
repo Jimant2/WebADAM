@@ -39,14 +39,11 @@ namespace webapi.Services
 
             Device device = new Device
             {
-                deviceName = definition.Name,
+                deviceName = definition.Name + " " + definition.Version,
                 valueType = deviceData[definition.Name].ToArray(),
                 channelXml = definition
             };
-
             await _repository.AddChannelXmlAsync(device);
         }
-
-
     }
 }

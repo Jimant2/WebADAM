@@ -20,9 +20,9 @@ namespace webapi.Services
         {
             var user = await _repository.FindByUsernameAsync(username);
 
-            if (user != null && PasswordHasher.Verify(password, user.Password)) // Use proper password hashing in real scenarios
+            if (user != null && PasswordHasher.Verify(password, user.Password))
             {
-                var license = user.LicenseXml; // Assuming LicenseXml is of type License
+                var license = user.LicenseXml;
 
                 var claims = new List<Claim>
         {
@@ -31,13 +31,11 @@ namespace webapi.Services
 
                 if (license.Roles != null)
                 {
-                    foreach (var role in license.Roles.Role) // Assuming LicenseRoles has a property called RoleList
+                    foreach (var role in license.Roles.Role) 
                     {
                         claims.Add(new Claim(ClaimTypes.Role, role));
                     }
                 }
-
-                // ... add other claims as needed based on Features, ChannelRestrictions, etc.
 
                 var identity = new ClaimsIdentity(claims, "custom", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
                 return new ClaimsPrincipal(identity);

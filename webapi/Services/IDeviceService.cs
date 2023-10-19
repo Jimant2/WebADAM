@@ -1,4 +1,5 @@
-﻿using webapi.Models;
+﻿using webapi.DefinitionModels;
+using webapi.Models;
 
 namespace webapi.Services
 {
@@ -10,5 +11,6 @@ namespace webapi.Services
         public Task<List<Device>> GetAllDevicesFromService();
 
         public Task<Device> GetDeviceByNameFromService(string deviceName);
+        public Task AddDeviceDefinitionFromService(Definition definition);
     }
 }

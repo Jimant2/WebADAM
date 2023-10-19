@@ -5,8 +5,8 @@ namespace webapi.Services
 {
     public static class PasswordHasher
     {
-        private const int SaltSize = 16; // bytes
-        private const int HashSize = 20; // bytes
+        private const int SaltSize = 16; 
+        private const int HashSize = 20; 
         private const int Iterations = 10000;
 
         public static string HashPassword(string password)

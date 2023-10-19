@@ -1,4 +1,5 @@
-﻿using webapi.DataRepos;
+﻿using webapi.DefinitionModels;
+using webapi.DataRepos;
 using webapi.Models;
 
 namespace webapi.Services
@@ -24,6 +25,17 @@ namespace webapi.Services
         public async Task<Device> GetDeviceByNameFromService(string deviceName)
         {
             return await _repository.GetDeviceByNameAsync(deviceName);
+        }
+        public async Task AddDeviceDefinitionFromService(Definition definition)
+        {
+            Device device = new Device
+            {
+                deviceName = definition.Name,
+                //TODO: Implement channel extracter method to value type
+              //  valueType = definition.
+                channelXml = definition
+            };
+             await _repository.AddChannelXmlAsync(device);
         }
     }
 }

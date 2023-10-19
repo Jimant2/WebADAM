@@ -15,7 +15,7 @@ using System.Xml;
 using webapi.LicenseModels;
 using System.Xml.Serialization;
 using System.Security.Cryptography;
-
+using webapi.DefinitionModels;
 
 namespace webapi.Controllers;
 
@@ -39,7 +39,32 @@ public class MainController : ControllerBase
     {
        var device = deviceService.GetDeviceNameFromService();
        return Ok(device);
-}
+    }
+    [HttpPost]
+    [Route ("addDeviceDefinitions")]
+    public ActionResult<Device> AddDeviceDefinitions(IFormFile deviceFile)
+    {
+        try
+        {
+            if (deviceFile != null && deviceFile.Length > 0 && deviceFile.ContentType == "text/xml")
+            {
+                using (var streamReader = new StreamReader(deviceFile.OpenReadStream()))
+                {
+                    XmlSerializer serializer = new XmlSerializer(typeof(Definition));
+                    Definition definition = (Definition)serializer.Deserialize(streamReader);
+
+                    deviceService.AddDeviceDefinitionFromService(definition);
+                    return Ok("XML uploaded successfully");
+                }
+            }
+            return BadRequest("Invalid or missing XML file.");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "Internal server error.");
+        }
+
+    }
 
     [HttpGet("dataSetByName/{deviceName}")]
     public async Task<ActionResult<IEnumerable<DataSet>>> GetDataSet(string deviceName)
@@ -114,14 +139,12 @@ public class MainController : ControllerBase
             {
                 return NotFound($"No data found for device named {deviceName}.");
             }
-
-            // Serialize the data to JSON
+          
             var jsonString = System.Text.Json.JsonSerializer.Serialize(dataSets);
 
             // Create a byte array of the JSON string
             var jsonBytes = Encoding.UTF8.GetBytes(jsonString);
 
-            // Return as a file with a device-specific name
             return File(jsonBytes, "application/json", $"{deviceName}_dataSets.json");
         }
         catch (Exception ex)

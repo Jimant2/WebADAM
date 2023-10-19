@@ -2,6 +2,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using webapi.Models;
+using webapi.DefinitionModels;
 
 namespace webapi.DataRepos
 {
@@ -41,10 +42,10 @@ namespace webapi.DataRepos
             return await deviceCollection.Find(d => d.deviceName == deviceName).FirstOrDefaultAsync();
         }
 
-        public async Task<Device> GetDeviceByValueTypeAsync(string valueType)
-        {
-            return await deviceCollection.Find(d => d.valueType == valueType).FirstOrDefaultAsync();
-        }
+       // public async Task<Device> GetDeviceByValueTypeAsync(string valueType)
+       // {
+       ////     return await deviceCollection.Find(d => d.valueType == valueType).FirstOrDefaultAsync();
+       // }
 
         public List<DataSet> GetDataSet()
         {
@@ -58,6 +59,11 @@ namespace webapi.DataRepos
         public async Task AddLicenseXmlAsync(Users user)
         {
             await usersCollection.InsertOneAsync(user);
+        }
+
+        public async Task AddChannelXmlAsync(Device deviceDefinition)
+        {
+            await deviceCollection.InsertOneAsync(deviceDefinition);
         }
 
         public async Task InsertDataSetAsync(List<DataSet> dataSet)

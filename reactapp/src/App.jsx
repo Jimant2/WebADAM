@@ -55,15 +55,21 @@ class App extends Component {
             if (!currentDevice ||
                 !currentDevice.channelXml ||
                 !currentDevice.channelXml.channelDefinition ||
-                !currentDevice.channelXml.channelDefinition.channels ||
-                !currentDevice.channelXml.channelDefinition.channels.numericChannels)
+                !currentDevice.channelXml.channelDefinition.channels)
                 return `Unnamed Channel ${id}`;
 
-            const matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === id);
+            // First, try to find the id in numericChannels
+            let matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === id);
+
+            // If not found in numericChannels, try textChannels
+            if (!matchedChannel) {
+                matchedChannel = currentDevice.channelXml.channelDefinition.channels.textChannels.find(channel => channel.id === id);
+            }
 
             console.log("Matched channel:", matchedChannel);
             return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
         };
+
 
 
 

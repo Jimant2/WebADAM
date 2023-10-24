@@ -27,7 +27,7 @@ class App extends Component {
     state = {
         datasets: [{ data: [], dataType: '' }, { data: [], dataType: '' }],
         devices: [],
-        loadingDevices: true,
+        loadingDevices: false,
         loadingDatasets: false,
         aggregationInterval: 60 * 1000,
         groupsAndChannels: [],
@@ -35,8 +35,7 @@ class App extends Component {
     };
 
     renderDevices = (devices) => {
-        console.log("Current device: " + devices);
-        return <span>Devices: {devices[0]?.deviceName || 'None'}</span>
+        return <span>Device: {devices[0]?.deviceName || 'None'}</span>
     }
     renderGroupTree = () => {
         const currentDeviceName = this.state.selectedDeviceName;  // Use the state's device name
@@ -46,45 +45,44 @@ class App extends Component {
         //console.log("Current Device:", JSON.stringify(currentDevice, null, 2));
 
         const lookupNameById = (id) => {
-            console.log("ID to lookup:", id);
+    console.log("ID to lookup:", id);
 
-            const currentDevice = this.state.devices.find(device => device.deviceName === currentDeviceName);
+    const currentDevice = this.state.devices.find(device => device.deviceName === currentDeviceName);
 
-            console.log("Using device for lookup:", currentDevice);
+    if (!currentDevice || 
+        !currentDevice.channelXml || 
+        !currentDevice.channelXml.channelDefinition || 
+        !currentDevice.channelXml.channelDefinition.channels) 
+        return `Unnamed Channel ${id}`;
 
-            if (!currentDevice ||
-                !currentDevice.channelXml ||
-                !currentDevice.channelXml.channelDefinition ||
-                !currentDevice.channelXml.channelDefinition.channels)
-                return `Unnamed Channel ${id}`;
+    // First, try to find the id in numericChannels
+    let matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === id);
 
-            // First, try to find the id in numericChannels
-            let matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === id);
+    // If not found in numericChannels, try textChannels
+    if (!matchedChannel) {
+        matchedChannel = currentDevice.channelXml.channelDefinition.channels.textChannels.find(channel => channel.id === id);
+    }
 
-            // If not found in numericChannels, try textChannels
-            if (!matchedChannel) {
-                matchedChannel = currentDevice.channelXml.channelDefinition.channels.textChannels.find(channel => channel.id === id);
-            }
-
-            console.log("Matched channel:", matchedChannel);
-            return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
-        };
-
-
-
+    console.log("Matched channel:", matchedChannel);
+    return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
+};
 
         return (
             <div className="group-tree">
                 {this.state.groupsAndChannels.map(group => (
                     <div key={group.groupName} className="group">
-                        {group.groupName}
-                        <ul>
-                            {group.channels.map((channel, index) => (
-                                <li key={`${channel.id}-${index}`}>
-                                    {lookupNameById(channel.id)}
-                                </li>
-                            ))}
-                        </ul>
+                        <span onClick={() => this.toggleChannelsDisplay(group.groupName)}>
+                            {group.groupName}
+                        </span>
+                        {group.isExpanded && (
+                            <ul>
+                                {group.channels.map((channel, index) => (
+                                    <li key={`${channel.id}-${index}`}>
+                                        {lookupNameById(channel.id)}
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
                     </div>
                 ))}
             </div>
@@ -93,9 +91,8 @@ class App extends Component {
 
     toggleChannelsDisplay = groupName => {
         const { groupsAndChannels } = this.state;
-        console.log(JSON.stringify(this.state.groupsAndChannels, null, 2));
         const group = groupsAndChannels.find(g => g.groupName === groupName);
-        group.isExpanded = !group.isExpanded; // toggle
+        group.isExpanded = !group.isExpanded;
         this.setState({ groupsAndChannels: [...groupsAndChannels] });
     }
 
@@ -150,18 +147,20 @@ class App extends Component {
 
         if (deviceName) {
             try {
-                // Fetch the device by its name from the backend.
                 const deviceFromAPI = await getDeviceByName(deviceName);
 
                 if (deviceFromAPI && !this.state.devices.some(device => device.deviceName === deviceName)) {
                     this.setState(prevState => ({
                         devices: [...prevState.devices, deviceFromAPI],
-                        selectedDeviceName: deviceName  // explicitly set selectedDeviceName
+                        selectedDeviceName: deviceName
                     }));
 
                     fetchGroupsAndChannels(deviceName)
                         .then(response => {
-                            const data = response || [];
+                            const data = response.map(group => ({
+                                ...group,
+                                isExpanded: false // initialize with expanded state
+                            })) || [];
                             console.log('Complete API response:', response);
                             this.setState({ groupsAndChannels: data });
                         })
@@ -174,10 +173,6 @@ class App extends Component {
             }
         }
     }
-
-
-
-
 
     fetchDatasetsAndSetState = async (deviceName) => {
         try {

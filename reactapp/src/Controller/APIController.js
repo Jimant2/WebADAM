@@ -25,10 +25,22 @@ export async function fetchDatasetsForDevice(deviceName) {
     }
 }
 
+export async function fetchGroupsAndChannels(deviceName) {
+    try {
+        const requestUrl = `https://localhost:7074/MainController/getGroupsAndChannels/?deviceName=${deviceName}`;
+        const response = await fetch(requestUrl);
+        console.log('Fetched groups and channels:', response);
+        const data = await response.json() || [];
+        return data;  // return data instead of calling this.setState
+    } catch (error) {
+        console.error("Failed fetching groups and channels:", error);
+        throw error;  // re-throw to be caught in the calling component
+    }
+}
 
 
-export async function getDevice() {
-    const response = await fetch('https://localhost:7074/MainController/device');
+export async function getAllDevices() {
+    const response = await fetch('https://localhost:7074/MainController/getAllDevices');
     if (response.headers.get("content-type")?.includes("application/json")) {
         return await response.json();
     } else {

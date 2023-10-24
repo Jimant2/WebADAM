@@ -6,7 +6,7 @@ namespace webapi.DataRepos
     public interface IWebADAMRepo
     {
         public List<DataLoader> GetDataLoader();
-        public List<Device> GetDevice();
+        public Task<Device> GetDeviceByName(string deviceName);
         public Task<List<Device>> GetAllDevicesAsync();
         public Task<Device> GetDeviceByNameAsync(string deviceName);
         public List<DataSet> GetDataSet();
@@ -17,6 +17,6 @@ namespace webapi.DataRepos
         //public Task<Device> GetDeviceByValueTypeAsync(string valueType);
         public Task<Users> FindByUsernameAsync(string username);
         public Task AddChannelXmlAsync(Device deviceDefinition);
-        public Task<Definition> GetDefinitionByDeviceName(string deviceName);
+        public Task<Definition> GetDefinitionByDeviceNameAsync(string deviceName);
     }
 }

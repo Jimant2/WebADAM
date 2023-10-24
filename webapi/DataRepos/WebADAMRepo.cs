@@ -27,9 +27,9 @@ namespace webapi.DataRepos
             return dataLoaderCollection.Find(_ => true).ToList();
         }
 
-        public List<Device> GetDevice()
+        public async Task<Device> GetDeviceByName(string deviceName)
         {
-            return deviceCollection.Find(_ => true).ToList();
+             return await deviceCollection.Find(device => device.deviceName == deviceName).FirstOrDefaultAsync();
         }
 
         public async Task<List<Device>> GetAllDevicesAsync()
@@ -90,6 +90,6 @@ namespace webapi.DataRepos
 
             return device?.channelXml;
         }
-
+        //TODO: Make connection between device and datasets again
     }
 }

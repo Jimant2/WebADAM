@@ -16,6 +16,7 @@ using webapi.LicenseModels;
 using System.Xml.Serialization;
 using System.Security.Cryptography;
 using webapi.DefinitionModels;
+using System.Linq.Expressions;
 
 namespace webapi.Controllers;
 
@@ -34,12 +35,12 @@ public class MainController : ControllerBase
         dataService = _dataService;
     }
 
-    [HttpGet("device")]
-    public ActionResult<List<Device>> GetDevice()
-    {
-       var device = deviceService.GetDeviceNameFromService();
-       return Ok(device);
-    }
+    //[HttpGet("device")]
+    //public ActionResult<List<Device>> GetDevice()
+    //{
+    //   var device = deviceService.GetDeviceNameFromService();
+    //   return Ok(device);
+    //}
     [HttpPost]
     [Route ("addDeviceDefinitions")]
     public ActionResult<Device> AddDeviceDefinitions(IFormFile deviceFile)
@@ -153,6 +154,52 @@ public class MainController : ControllerBase
         }
     }
 
+    [HttpGet("getGroupsAndChannels")]
+    public async Task<IActionResult> GetGroupsAndChannels(string deviceName)
+    {
+        if (string.IsNullOrEmpty(deviceName))
+        {
+            return BadRequest("Device name is required.");
+        }
 
+        var groupsAndChannels = await deviceService.GetDefinitionByDeviceName(deviceName);
 
+        return Ok(groupsAndChannels);
+    }
+    [HttpGet("getAllDeviceNames")]
+    public async Task<IActionResult> GetAllDeviceNames()
+        {
+        try
+        {
+            var deviceNames = await deviceService.GetAllDeviceNamesFromService();
+            if (!deviceNames.Any())
+            {
+                return NotFound("No Device found");
+            }
+            return Ok(deviceNames);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, "Internal server error.");
+        }
+    }
+    [HttpGet("getAllDevices")]
+    public async Task<IActionResult> GetAllDevices ()
+    {
+        try
+        {
+            var device = await deviceService.GetAllDeviceNamesFromService();
+            if (!device.Any())
+            {
+                return NotFound("Device Not Found");
+            }
+            return Ok(device);
+        }
+        catch(Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, "Internal server error.");
+        }
+    }
 }

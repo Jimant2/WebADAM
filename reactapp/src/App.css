@@ -88,3 +88,16 @@
     color: #fff;
     border: 2px solid #ccc
 }
+/*Tree directory*/
+.group-tree .group {
+    border: 1px solid black;
+    margin: 5px;
+    padding: 5px;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+    .group-tree .group ul {
+        /*list-style: none;*/
+        padding-left: 20px;
+    }

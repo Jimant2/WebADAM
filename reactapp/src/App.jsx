@@ -1,12 +1,27 @@
 // eslint-disable-next-line no-unused-vars
-import React, { Component } from 'react';
+import React, { Component, useEffect } from 'react';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
+import LoginPage from './LoginPage';
 import GraphVisualization from './Component/GraphVisualization';
-import { fetchDatasetsForDevice, getDevice } from './Controller/APIController';
+import { fetchDatasetsForDevice, fetchGroupsAndChannels, getAllDevices } from './Controller/APIController';
 import Header from './Component/Header';
 import Footer from './Component/Footer';
 import './App.css';
 
-export default class App extends Component {
+export function AppWrapper() {
+    const navigate = useNavigate();
+
+    useEffect(() => {
+        if (document.cookie.includes('CookieAuth')) {
+            navigate('/main');
+        }
+    }, []);
+
+    return <App />;
+}
+
+class App extends Component {
     static displayName = App.name;
 
     state = {
@@ -15,15 +30,61 @@ export default class App extends Component {
         loadingDevices: true,
         loadingDatasets: false,
         aggregationInterval: 60 * 1000,
+        groupsAndChannels: [],
+        selectedDeviceName: null,
     };
 
-    componentDidMount() {
-        this.getDeviceAndSetState();
-    }
-
     renderDevices = (devices) => {
+        console.log("Current device: " + devices);
         return <span>Devices: {devices[0]?.deviceName || 'None'}</span>
     }
+    renderGroupTree = () => {
+        const currentDeviceName = this.state.selectedDeviceName;  // Use the state's device name
+        console.log(currentDeviceName);
+        // Find the relevant device from the devices array
+        const currentDevice = this.state.devices.find(device => device.deviceName === currentDeviceName);
+        console.log("Current Device:", JSON.stringify(currentDevice, null, 2));
+
+        const lookupNameById = (id) => {
+            // Get the current device using the deviceName
+            const currentDevice = this.state.devices.find(device => device.deviceName === this.state.selectedDeviceName);
+
+            if (!currentDevice || !currentDevice.channelXml || !currentDevice.channelXml.ChannelDefinition || !currentDevice.channelXml.ChannelDefinition.Channels || !currentDevice.channelXml.ChannelDefinition.Channels.NumericChannels)
+                return `Unnamed Channel ${id}`;
+
+            // Look up the channel's Name by its id from the current device's channelXml
+            const matchedChannel = currentDevice.channelXml.ChannelDefinition.Channels.NumericChannels.find(channel => channel._id === id);
+
+            return matchedChannel ? matchedChannel.Name : `Unnamed Channel ${id}`;
+        };
+
+
+        return (
+            <div className="group-tree">
+                {this.state.groupsAndChannels.map(group => (
+                    <div key={group.groupName} className="group">
+                        {group.groupName}
+                        <ul>
+                            {group.channels.map((channel, index) => (
+                                <li key={`${channel.id}-${index}`}>
+                                    {lookupNameById(channel.id)}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                ))}
+            </div>
+        );
+    }
+
+    toggleChannelsDisplay = groupName => {
+        const { groupsAndChannels } = this.state;
+        console.log(JSON.stringify(this.state.groupsAndChannels, null, 2));
+        const group = groupsAndChannels.find(g => g.groupName === groupName);
+        group.isExpanded = !group.isExpanded; // toggle
+        this.setState({ groupsAndChannels: [...groupsAndChannels] });
+    }
+
     formatTimestampToTime = (timestamp) => {
         const date = new Date(timestamp);
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
@@ -70,6 +131,26 @@ export default class App extends Component {
             this.setState({ loadingDatasets: false });
         }
     }
+    handleDeviceSelection = (deviceName) => {
+        console.log("Device selected App.jsx:" + deviceName);
+        if (deviceName) {
+            if (!this.state.devices.some(device => device.deviceName === deviceName)) {
+                this.setState(prevState => ({
+                    devices: [...prevState.devices, { deviceName: deviceName }],
+                    selectedDeviceName: deviceName  // explicitly set selectedDeviceName
+                }));
+                fetchGroupsAndChannels(deviceName)
+                    .then(response => {
+                        const data = response || [];
+                        console.log('Complete API response:', response);
+                        this.setState({ groupsAndChannels: data });
+                    })
+                    .catch(error => {
+                        console.error('Failed to fetch data:', error);
+                    });
+            }
+        }
+    };
 
 
 
@@ -85,37 +166,30 @@ export default class App extends Component {
         }
     }
 
-    getDeviceAndSetState = async () => {
+
+    async fetchAllDevices() {
         try {
-            const devices = await getDevice();
-            this.setState({ devices: devices, loadingDevices: false });
+            const devices = await getAllDevices();
+            this.setState({ devices });
+            console.log("FetchAllDevicesState: " + devices);
         } catch (error) {
-            console.error(error);
+            console.error('Failed to fetch devices:', error);
         }
     }
 
-    render() {
+    renderMainApp = () => {
         const { devices, loadingDevices, datasets } = this.state;
 
         let deviceContent = loadingDevices ? <p>Loading the devices...</p> : this.renderDevices(devices);
 
         return (
             <div className="app-container">
-                <Header />
+                <Header onDeviceSelect={this.handleDeviceSelection} />
                 <div className="content-container">
-                    
                     <div className="devices-container">
-                        {devices.map(device => (
-                            <div key={device.id}
-                                className="device"
-                                draggable
-                                onDragStart={(e) => e.dataTransfer.setData("text/plain", device.deviceName)}>
-                                {device.deviceName}
-                            </div>
-                        ))}
-                        
+                        {this.renderGroupTree()}
                     </div>
-                    
+
                     <div className="graphs-container">
                         {deviceContent}
                         <div className="aggregation-dropdown">
@@ -143,13 +217,28 @@ export default class App extends Component {
                             <GraphVisualization data={datasets[1].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[1].dataType || "value"} />
                         </div>
                     </div>
-                    
                 </div>
                 <Footer />
             </div>
         );
-        }
-
     }
 
+    render() {
+        return (
+            <Routes>
+                <Route path="/" element={<LoginPage />} />
+                <Route path="/main" element={this.renderMainApp()} />
+            </Routes>
+        );
+    }
 
+}
+function Main() {
+    return (
+        <Router>
+            <AppWrapper />
+        </Router>
+    );
+}
+
+export default Main;

@@ -5,12 +5,13 @@ namespace webapi.Services
 {
     public interface IDeviceService
     {
+        //public Task<List<Device>> GetAllDevicesFromService();
 
-        public List<Device> GetDeviceNameFromService();
-
-        public Task<List<Device>> GetAllDevicesFromService();
+        public Task<List<string>> GetAllDeviceNamesFromService();
 
         public Task<Device> GetDeviceByNameFromService(string deviceName);
         public Task AddDeviceDefinitionFromService(Definition definition);
+        public Task<List<GroupChannelDTO>> GetDefinitionByDeviceName(string deviceName);
+
     }
 }

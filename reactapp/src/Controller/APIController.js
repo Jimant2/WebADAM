@@ -38,7 +38,6 @@ export async function fetchGroupsAndChannels(deviceName) {
     }
 }
 
-
 export async function getAllDevices() {
     const response = await fetch('https://localhost:7074/MainController/getAllDevices');
     if (response.headers.get("content-type")?.includes("application/json")) {
@@ -48,3 +47,14 @@ export async function getAllDevices() {
         throw new Error(errorMessage);
     }
 }
+
+    export async function getDeviceByName(deviceName) {
+        const requestUrl = `https://localhost:7074/MainController/getDeviceByName/?deviceName=${deviceName}`;
+        const response = await fetch(requestUrl);
+        if (response.headers.get("content-type")?.includes("application/json")) {
+            return await response.json();
+        } else {
+            const errorMessage = `Received non-JSON response: ${await response.text()}`;
+            throw new Error(errorMessage);
+        }
+    }

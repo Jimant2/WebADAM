@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import GraphVisualization from './Component/GraphVisualization';
-import { fetchDatasetsForDevice, fetchGroupsAndChannels, getAllDevices } from './Controller/APIController';
+import { fetchDatasetsForDevice, fetchGroupsAndChannels, getAllDevices, getDeviceByName } from './Controller/APIController';
 import Header from './Component/Header';
 import Footer from './Component/Footer';
 import './App.css';
@@ -40,23 +40,31 @@ class App extends Component {
     }
     renderGroupTree = () => {
         const currentDeviceName = this.state.selectedDeviceName;  // Use the state's device name
-        console.log(currentDeviceName);
+        console.log("currentDeviceName: ", currentDeviceName);
         // Find the relevant device from the devices array
-        const currentDevice = this.state.devices.find(device => device.deviceName === currentDeviceName);
-        console.log("Current Device:", JSON.stringify(currentDevice, null, 2));
+        // const currentDevice = this.state.devices.find(device => device.deviceName === currentDeviceName);
+        //console.log("Current Device:", JSON.stringify(currentDevice, null, 2));
 
         const lookupNameById = (id) => {
-            // Get the current device using the deviceName
-            const currentDevice = this.state.devices.find(device => device.deviceName === this.state.selectedDeviceName);
+            console.log("ID to lookup:", id);
 
-            if (!currentDevice || !currentDevice.channelXml || !currentDevice.channelXml.ChannelDefinition || !currentDevice.channelXml.ChannelDefinition.Channels || !currentDevice.channelXml.ChannelDefinition.Channels.NumericChannels)
+            const currentDevice = this.state.devices.find(device => device.deviceName === currentDeviceName);
+
+            console.log("Using device for lookup:", currentDevice);
+
+            if (!currentDevice ||
+                !currentDevice.channelXml ||
+                !currentDevice.channelXml.channelDefinition ||
+                !currentDevice.channelXml.channelDefinition.channels ||
+                !currentDevice.channelXml.channelDefinition.channels.numericChannels)
                 return `Unnamed Channel ${id}`;
 
-            // Look up the channel's Name by its id from the current device's channelXml
-            const matchedChannel = currentDevice.channelXml.ChannelDefinition.Channels.NumericChannels.find(channel => channel._id === id);
+            const matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === id);
 
-            return matchedChannel ? matchedChannel.Name : `Unnamed Channel ${id}`;
+            console.log("Matched channel:", matchedChannel);
+            return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
         };
+
 
 
         return (
@@ -131,26 +139,36 @@ class App extends Component {
             this.setState({ loadingDatasets: false });
         }
     }
-    handleDeviceSelection = (deviceName) => {
-        console.log("Device selected App.jsx:" + deviceName);
+    handleDeviceSelection = async (deviceName) => {
+        console.log("Device selected App.jsx:", deviceName);
+
         if (deviceName) {
-            if (!this.state.devices.some(device => device.deviceName === deviceName)) {
-                this.setState(prevState => ({
-                    devices: [...prevState.devices, { deviceName: deviceName }],
-                    selectedDeviceName: deviceName  // explicitly set selectedDeviceName
-                }));
-                fetchGroupsAndChannels(deviceName)
-                    .then(response => {
-                        const data = response || [];
-                        console.log('Complete API response:', response);
-                        this.setState({ groupsAndChannels: data });
-                    })
-                    .catch(error => {
-                        console.error('Failed to fetch data:', error);
-                    });
+            try {
+                // Fetch the device by its name from the backend.
+                const deviceFromAPI = await getDeviceByName(deviceName);
+
+                if (deviceFromAPI && !this.state.devices.some(device => device.deviceName === deviceName)) {
+                    this.setState(prevState => ({
+                        devices: [...prevState.devices, deviceFromAPI],
+                        selectedDeviceName: deviceName  // explicitly set selectedDeviceName
+                    }));
+
+                    fetchGroupsAndChannels(deviceName)
+                        .then(response => {
+                            const data = response || [];
+                            console.log('Complete API response:', response);
+                            this.setState({ groupsAndChannels: data });
+                        })
+                        .catch(error => {
+                            console.error('Failed to fetch data:', error);
+                        });
+                }
+            } catch (error) {
+                console.error("Failed to retrieve the device:", error);
             }
         }
-    };
+    }
+
 
 
 

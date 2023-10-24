@@ -184,8 +184,9 @@ public class MainController : ControllerBase
             return StatusCode(500, "Internal server error.");
         }
     }
+    //THIS IS BEING USED IN THE API CONTROLLER TO RETRIEVE NAMES FOR THE LIST IN THE PROJECT TYPES
     [HttpGet("getAllDevices")]
-    public async Task<IActionResult> GetAllDevices ()
+    public async Task<IActionResult> GetAllDevices()
     {
         try
         {
@@ -197,6 +198,24 @@ public class MainController : ControllerBase
             return Ok(device);
         }
         catch(Exception ex)
+        {
+            Console.WriteLine(ex);
+            return StatusCode(500, "Internal server error.");
+        }
+    }
+    [HttpGet("getDeviceByName")]
+    public async Task<IActionResult> GetDeviceByName(string deviceName)
+    {
+        try
+        {
+            var device = await deviceService.GetDeviceByNameFromService(deviceName);
+            if (device == null)
+            {
+                return NotFound("Device Not Found");
+            }
+            return Ok(device);
+        }
+        catch (Exception ex)
         {
             Console.WriteLine(ex);
             return StatusCode(500, "Internal server error.");

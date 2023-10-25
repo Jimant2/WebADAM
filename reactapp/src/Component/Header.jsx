@@ -22,6 +22,7 @@ function Header({ onDeviceSelect }) {
         } catch (error) {
             console.error('Failed to fetch device names:', error);
         }
+        handleClose();
     };
     const handleSelectDevice = (deviceName) => {
         if (deviceName && typeof onDeviceSelect === 'function') {
@@ -36,57 +37,6 @@ function Header({ onDeviceSelect }) {
     const handleClose = () => {
         setAnchorEl(null);
     };
-
-    //const handleOpenFile = () => {
-    //    fileInputRef.current.click();
-    //    handleClose();
-    //};
-
-    //const handleExport = () => {
-
-    //};
-
-    {/*Deprecated method*/ }
-
-    //const handleFileChange = async (e) => {
-    //    const file = e.target.files[0];
-    //    if (!file) {
-    //        console.error("No file selected");
-    //        return;
-    //    }
-
-    //    const dataType = window.prompt('Please enter the data type:');
-    //    if (!dataType || dataType.trim() === '') {
-    //        alert('Data type is required.');
-    //        return;
-    //    }
-
-    //    const formData = new FormData();
-    //    formData.append('file', file);
-
-    //    const requestUrl = `https://localhost:7074/MainController/uploadFile?dataType=${encodeURIComponent(dataType)}`;
-
-    //    try {
-    //        const response = await fetch(requestUrl, {
-    //            method: 'POST',
-    //            body: formData,
-    //        });
-
-    //        if (response.ok) {
-    //            console.log('File uploaded successfully');
-    //            alert("File uploaded!")
-    //        } else {
-    //            console.error('Error response:', response);
-    //            const errorData = await response.json();
-    //            console.error('Error data:', errorData);
-    //            alert(`Error uploading file: ${errorData.message || 'Unknown error'}`);
-    //        }
-    //    } catch (error) {
-    //        console.error('Error uploading file:', error);
-    //        alert(`Error uploading file: ${error.message}`);
-    //    }
-    //};
-
 
     return (
         <header>

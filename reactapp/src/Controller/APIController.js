@@ -1,5 +1,5 @@
 export async function fetchDatasetsForDevice(deviceName) {
-    const response = await fetch(`https://localhost:7074/MainController/dataSetByName/${deviceName}`);
+    const response = await fetch(`/MainController/dataSetByName/${deviceName}`);
     if (response.ok) {
         const dataSets = await response.json();
         if (dataSets.length === 0) {
@@ -27,7 +27,7 @@ export async function fetchDatasetsForDevice(deviceName) {
 
 export async function fetchGroupsAndChannels(deviceName) {
     try {
-        const requestUrl = `https://localhost:7074/MainController/getGroupsAndChannels/?deviceName=${deviceName}`;
+        const requestUrl = `/MainController/getGroupsAndChannels/?deviceName=${deviceName}`;
         const response = await fetch(requestUrl);
         console.log('Fetched groups and channels:', response);
         const data = await response.json() || [];
@@ -39,7 +39,7 @@ export async function fetchGroupsAndChannels(deviceName) {
 }
 
 export async function getAllDevices() {
-    const response = await fetch('https://localhost:7074/MainController/getAllDevices');
+    const response = await fetch('/MainController/getAllDevices');
     if (response.headers.get("content-type")?.includes("application/json")) {
         return await response.json();
     } else {
@@ -49,7 +49,7 @@ export async function getAllDevices() {
 }
 
     export async function getDeviceByName(deviceName) {
-        const requestUrl = `https://localhost:7074/MainController/getDeviceByName/?deviceName=${deviceName}`;
+        const requestUrl = `/MainController/getDeviceByName/?deviceName=${deviceName}`;
         const response = await fetch(requestUrl);
         if (response.headers.get("content-type")?.includes("application/json")) {
             return await response.json();

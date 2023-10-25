@@ -33,8 +33,11 @@ export default defineConfig({
     },
     server: {
         proxy: {
-            //TODO: Change to Main Controller
-            '^/weatherforecast': {
+            '^/AuthController': {
+                target: 'https://localhost:7074/',
+                secure: false
+            },
+            '^/MainController': {
                 target: 'https://localhost:7074/',
                 secure: false
             }

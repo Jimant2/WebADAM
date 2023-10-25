@@ -8,6 +8,7 @@ import { fetchDatasetsForDevice, fetchGroupsAndChannels, getAllDevices, getDevic
 import Header from './Component/Header';
 import Footer from './Component/Footer';
 import './App.css';
+import { BiAtom } from 'react-icons/bi';
 
 export function AppWrapper() {
     const navigate = useNavigate();
@@ -63,6 +64,7 @@ class App extends Component {
 };
 
         return (
+            
             <div className="group-tree">
                 {this.state.groupsAndChannels.map(group => (
                     <div key={group.groupName} className="group">
@@ -73,7 +75,7 @@ class App extends Component {
                             <ul>
                                 {group.channels.map((channel, index) => (
                                     <li key={`${channel.id}-${index}`} draggable="true">
-                                        {lookupNameById(channel.id)}
+                                      <BiAtom/> {lookupNameById(channel.id)}
                                     </li>
                                 ))}
                             </ul>

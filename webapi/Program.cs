@@ -47,6 +47,11 @@ builder.Services.AddAuthentication("CookieAuth")
             config.Cookie.Name = "User.Cookie";
             config.LoginPath = "/Login";
         });
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Cookie.SameSite = SameSiteMode.None;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+});
 
 builder.Services.AddControllers();
 

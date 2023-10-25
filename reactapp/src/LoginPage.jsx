@@ -25,11 +25,12 @@ function LoginPage() {
         const formData = new FormData();
         formData.append('licenseFile', licenseFile);
 
-        const requestUrl = 'https://localhost:7074/MainController/uploadLicense'
+        const requestUrl = '/MainController/uploadLicense'
         try {
             const response = await fetch(requestUrl, {
                 method: 'POST',
                 body: formData,
+                credentials: 'include'
             });
 
             if (response.status === 200) {
@@ -49,7 +50,7 @@ function LoginPage() {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const requestUrl = 'https://localhost:7074/AuthController/login';
+        const requestUrl = '/AuthController/login';
         const requestData = {
             username: username,
             password: password
@@ -60,8 +61,10 @@ function LoginPage() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
+                    
                 },
-                body: JSON.stringify(requestData)
+                body: JSON.stringify(requestData),
+                credentials: 'include'
             });
 
             if (response.status === 200) {

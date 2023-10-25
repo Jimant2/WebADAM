@@ -11,6 +11,11 @@ export function ProjectTypesModal({ open, onClose, deviceNames, onSelect }) {
     useEffect(() => {
         if (open) {
             externalWindowRef.current = window.open('', '', 'width=600,height=400,left=200,top=200');
+            const cssLink = document.createElement("link");
+            cssLink.href = "/ProjectTypesModal.css";
+            cssLink.rel = "stylesheet";
+            cssLink.type = "text/css";
+            externalWindowRef.current.document.head.appendChild(cssLink);
             externalWindowRef.current.document.body.appendChild(containerElRef.current);
             externalWindowRef.current.addEventListener('beforeunload', () => {
                 //ReactDOM.root.unmount(containerElRef.current);
@@ -32,8 +37,8 @@ export function ProjectTypesModal({ open, onClose, deviceNames, onSelect }) {
 
     const content = (
         <div>
-            <h2>Project Types</h2>
-            <ul>
+            <h2 className="project-types-title">Project Types</h2>
+            <ul className="devices-list">
                 {deviceNames.map(name => (
                     <li
                         key={name}
@@ -44,7 +49,7 @@ export function ProjectTypesModal({ open, onClose, deviceNames, onSelect }) {
                     </li>
                 ))}
             </ul>
-            <button onClick={() => {
+            <button className="select-button" onClick={() => {
                 if (selectedDevice) {
                     onSelect(selectedDevice);
                     console.log("Selected device:" + selectedDevice);

@@ -40,12 +40,8 @@ class App extends Component {
     renderGroupTree = () => {
         const currentDeviceName = this.state.selectedDeviceName;  // Use the state's device name
         console.log("currentDeviceName: ", currentDeviceName);
-        // Find the relevant device from the devices array
-        // const currentDevice = this.state.devices.find(device => device.deviceName === currentDeviceName);
-        //console.log("Current Device:", JSON.stringify(currentDevice, null, 2));
 
         const lookupNameById = (id) => {
-    console.log("ID to lookup:", id);
 
     const currentDevice = this.state.devices.find(device => device.deviceName === currentDeviceName);
 
@@ -63,7 +59,6 @@ class App extends Component {
         matchedChannel = currentDevice.channelXml.channelDefinition.channels.textChannels.find(channel => channel.id === id);
     }
 
-    console.log("Matched channel:", matchedChannel);
     return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
 };
 
@@ -77,7 +72,7 @@ class App extends Component {
                         {group.isExpanded && (
                             <ul>
                                 {group.channels.map((channel, index) => (
-                                    <li key={`${channel.id}-${index}`}>
+                                    <li key={`${channel.id}-${index}`} draggable="true">
                                         {lookupNameById(channel.id)}
                                     </li>
                                 ))}
@@ -184,7 +179,6 @@ class App extends Component {
             this.setState({ loadingDatasets: false });
         }
     }
-
 
     async fetchAllDevices() {
         try {

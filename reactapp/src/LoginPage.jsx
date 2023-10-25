@@ -1,12 +1,13 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-
+import './LoginPage.css';
+import logo from './assets/DAC-logo.png';
 function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [licenseFile, setLicenseFile] = useState(null);
     const navigation = useNavigate();
+    const fileInput = useRef(null);
 
     useEffect(() => {
         if (document.cookie.includes('CookieAuth')) {
@@ -14,16 +15,15 @@ function LoginPage() {
         }
     }, [navigation]);
 
-    const handleLicenseUpload = async (e) => {
-        e.preventDefault();
-
-        if (!licenseFile) {
+    const handleFileSelection = async (e) => {
+        const selectedFile = e.target.files[0];
+        if (!selectedFile) {
             alert("No license selected");
             return;
         }
 
         const formData = new FormData();
-        formData.append('licenseFile', licenseFile);
+        formData.append('licenseFile', selectedFile);
 
         const requestUrl = '/MainController/uploadLicense'
         try {
@@ -46,6 +46,7 @@ function LoginPage() {
             console.error('Error uploading license:', error);
         }
     };
+
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -82,18 +83,22 @@ function LoginPage() {
 
 
     return (
-        <div>
-            <div>
-                <input type="file" accept=".xml" onChange={e => setLicenseFile(e.target.files[0])} />
-                <button onClick={handleLicenseUpload}>Upload License</button>
+        <div className="login-container">
+            <div className="imageContainer">
+                <img src={logo} alt="DAC Logo"></img>
             </div>
-            <form onSubmit={handleSubmit}>
+            <div className="license-upload">
+                <input type="file" accept=".xml" style={{ display: 'none' }} ref={fileInput} onChange={handleFileSelection} />
+                <button onClick={() => fileInput.current.click()}>Upload License</button>
+            </div>
+            <form className="login-form" onSubmit={handleSubmit}>
                 <input type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Username" />
                 <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Password" />
                 <button type="submit">Login</button>
             </form>
         </div>
     );
+
 }
 
 export default LoginPage;

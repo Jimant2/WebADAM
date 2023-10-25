@@ -35,7 +35,7 @@ namespace webapi.Services
                 DateTime date1 = DateTime.Now;
                 var currentTime = date1.AddHours(2);
 
-             //   var existingDevice = await _repository.GetDeviceByValueTypeAsync(dataType);
+                var existingDevice = await _repository.GetDeviceByValueTypeAsync(dataType);
                 var dataSetList = new List<DataSet>();
 
                 using (var reader = new StreamReader(file.OpenReadStream()))
@@ -88,7 +88,7 @@ namespace webapi.Services
 
                         var newDataSetDocument = new DataSet
                         {
-                   //         deviceId = existingDevice._id,
+                            deviceId = existingDevice._id,
                             timestamp = currentTime,
                             dataType = dataType,
                             Data = new List<Data> { newDataDocument }

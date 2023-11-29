@@ -4,7 +4,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import GraphVisualization from './Component/GraphVisualization';
-import { fetchDatasetsForDevice, fetchGroupsAndChannels, getAllDevices, getDeviceByName } from './Controller/APIController';
+import { fetchDatasetsByDataType, fetchGroupsAndChannels, getAllDevices, getDeviceByName } from './Controller/APIController';
 import Header from './Component/Header';
 import Footer from './Component/Footer';
 import './App.css';
@@ -33,38 +33,45 @@ class App extends Component {
         aggregationInterval: 60 * 1000,
         groupsAndChannels: [],
         selectedDeviceName: null,
+        valueType: '',
+        dataType: '',
     };
+
+    lookupNameByChannelId = (id) => {
+        const currentDevice = this.state.devices.find(device => device.deviceName === this.state.selectedDeviceName);
+
+        if (!currentDevice ||
+            !currentDevice.channelXml ||
+            !currentDevice.channelXml.channelDefinition ||
+            !currentDevice.channelXml.channelDefinition.channels)
+            return `Unnamed Channel ${id}`;
+
+        // First, try to find the id in numericChannels
+        let matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === id);
+
+        // If not found in numericChannels, try textChannels
+        if (!matchedChannel) {
+            matchedChannel = currentDevice.channelXml.channelDefinition.channels.textChannels.find(channel => channel.id === id);
+        }
+
+        // If a matched channel is found, return its name, otherwise return the default
+        return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
+    };
+
+
 
     renderDevices = (devices) => {
         return <span>Device: {devices[0]?.deviceName || 'None'}</span>
     }
     renderGroupTree = () => {
-        const currentDeviceName = this.state.selectedDeviceName;  // Use the state's device name
+        const currentDeviceName = this.state.selectedDeviceName; // Use the state's device name
         console.log("currentDeviceName: ", currentDeviceName);
 
-        const lookupNameById = (id) => {
-
-    const currentDevice = this.state.devices.find(device => device.deviceName === currentDeviceName);
-
-    if (!currentDevice || 
-        !currentDevice.channelXml || 
-        !currentDevice.channelXml.channelDefinition || 
-        !currentDevice.channelXml.channelDefinition.channels) 
-        return `Unnamed Channel ${id}`;
-
-    // First, try to find the id in numericChannels
-    let matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === id);
-
-    // If not found in numericChannels, try textChannels
-    if (!matchedChannel) {
-        matchedChannel = currentDevice.channelXml.channelDefinition.channels.textChannels.find(channel => channel.id === id);
-    }
-
-    return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
-};
+      const handleDragStart = (e, channelId) => {
+            e.dataTransfer.setData("text/plain", channelId);
+        };
 
         return (
-            
             <div className="group-tree">
                 {this.state.groupsAndChannels.map(group => (
                     <div key={group.groupName} className="group">
@@ -74,8 +81,8 @@ class App extends Component {
                         {group.isExpanded && (
                             <ul>
                                 {group.channels.map((channel, index) => (
-                                    <li key={`${channel.id}-${index}`} draggable="true">
-                                      <BiAtom/> {lookupNameById(channel.id)}
+                                    <li key={`${channel.id}-${index}`} draggable="true" onDragStart={(e) => handleDragStart(e, channel.id)}>
+                                        <BiAtom /> {this.lookupNameByChannelId(channel.id)}
                                     </li>
                                 ))}
                             </ul>
@@ -98,13 +105,20 @@ class App extends Component {
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
     }
 
+   
+
     handleDropOnGraph = (index) => async (e) => {
         e.preventDefault();
-        const deviceName = e.dataTransfer.getData("text/plain");
-        console.log(`Fetching data for graph ${index + 1}, device:`, deviceName);
+        const channelId = parseInt(e.dataTransfer.getData("text/plain"), 10);
         try {
+            // Retrieve the channelName using await
+            const channelName = this.lookupNameByChannelId(channelId);
+            console.log(`Fetching data for graph ${index + 1}, channelName is:`, channelName);
+
             this.setState({ loadingDatasets: true });
-            const { data, dataType } = await fetchDatasetsForDevice(deviceName);
+
+            // Use channelName directly in the fetchDatasetsByDataType function
+            const { data, dataType } = await fetchDatasetsByDataType(channelName);
             console.log('Fetched data:', data);
 
             // Aggregate the data based on the selected interval
@@ -139,6 +153,7 @@ class App extends Component {
             this.setState({ loadingDatasets: false });
         }
     }
+
     handleDeviceSelection = async (deviceName) => {
         console.log("Device selected App.jsx:", deviceName);
 
@@ -171,10 +186,10 @@ class App extends Component {
         }
     }
 
-    fetchDatasetsAndSetState = async (deviceName) => {
+    fetchDatasetsAndSetState = async (dataType) => {
         try {
             this.setState({ loadingDatasets: true });
-            const dataSets = await fetchDatasetsForDevice(deviceName);
+            const dataSets = await fetchDatasetsByDataType(dataType);
             this.setState({ currentDatasets: dataSets, loadingDatasets: false });
         } catch (error) {
             console.error(error);
@@ -222,7 +237,7 @@ class App extends Component {
                             </select>
                         </div>
                         <div className="graph"
-                            onDrop={this.handleDropOnGraph(0)} // Pass the index here
+                            onDrop={this.handleDropOnGraph(0)}  // Pass the index here
                             onDragOver={(e) => e.preventDefault()}>
                             <GraphVisualization data={datasets[0].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[0].dataType || "value"} />
                         </div>

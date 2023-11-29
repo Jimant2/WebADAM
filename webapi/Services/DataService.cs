@@ -24,9 +24,9 @@ namespace webapi.Services
 
             await _repository.InsertDataSetAsync(dataSet);
         }
-        public async Task<List<DataSet>> GetDataSetsByDeviceNameFromService(string deviceName)
+        public async Task<List<DataSet>> GetDataSetsByDataTypeFromService(string dataType)
         {
-            return await _repository.GetDataSetsByDeviceNameAsync(deviceName);
+            return await _repository.GetDataSetsByDataTypeAsync(dataType);
         }
         public async Task<List<DataSet>> UploadFileFromService(IFormFile file, string dataType)
         {

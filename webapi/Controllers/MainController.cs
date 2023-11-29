@@ -67,11 +67,22 @@ public class MainController : ControllerBase
 
     }
 
-    [HttpGet("dataSetByName/{deviceName}")]
-    public async Task<ActionResult<IEnumerable<DataSet>>> GetDataSet(string deviceName)
+    [HttpGet]
+    [Route("dataSetByDataType/{dataType}")]
+    public async Task<ActionResult<IEnumerable<DataSet>>> GetDataSetsByDataType(string dataType)
     {
-        var data = await dataService.GetDataSetsByDeviceNameFromService(deviceName);
-        return Ok(data);
+        try
+        {
+            var data = await dataService.GetDataSetsByDataTypeFromService(dataType);
+            Console.WriteLine($"Retrieved {data.Count} datasets for dataType: {dataType}");
+
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return BadRequest(ex.Message);
+        }
     }
 
     //[HttpGet("dataLoader")]
@@ -134,7 +145,7 @@ public class MainController : ControllerBase
             }
 
             // Retrieve the data from the database based on deviceName
-            var dataSets = await dataService.GetDataSetsByDeviceNameFromService(deviceName);
+            var dataSets = await dataService.GetDataSetsByDataTypeFromService(deviceName);
 
             if (!dataSets.Any())
             {

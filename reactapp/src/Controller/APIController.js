@@ -1,12 +1,16 @@
-export async function fetchDatasetsForDevice(deviceName) {
-    const response = await fetch(`/MainController/dataSetByName/${deviceName}`);
+export async function fetchDatasetsByDataType(dataType) {
+    const response = await fetch(`/MainController/dataSetByDataType/${dataType}`);
+
     if (response.ok) {
         const dataSets = await response.json();
-        if (dataSets.length === 0) {
+
+        console.log('Received dataSets:', dataSets);
+
+        if (!Array.isArray(dataSets) || dataSets.length === 0) {
+            console.log('Unexpected dataSets format:', dataSets);
             return { data: [], dataType: '' };
         }
 
-        // Map through all datasets and combine the data
         const allData = dataSets.flatMap(dataSet =>
             dataSet.data.map(dataPoint => ({
                 timestamp: new Date(dataPoint.timestamp).getTime(),
@@ -17,13 +21,15 @@ export async function fetchDatasetsForDevice(deviceName) {
         allData.sort((a, b) => a.timestamp - b.timestamp);
         return {
             data: allData,
-            dataType: dataSets[0].dataType 
+            dataType: dataSets[0].dataType
         };
     } else {
         const errorMessage = `Failed to fetch datasets: ${await response.text()}`;
         throw new Error(errorMessage);
     }
 }
+
+
 
 export async function fetchGroupsAndChannels(deviceName) {
     try {

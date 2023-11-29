@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using webapi.Models;
 using webapi.DefinitionModels;
+using MongoDB.Bson;
 
 namespace webapi.DataRepos
 {
@@ -72,12 +73,25 @@ namespace webapi.DataRepos
             await dataSetCollection.InsertManyAsync(dataSet);
         }
 
-        public async Task<List<DataSet>> GetDataSetsByDeviceNameAsync(string deviceName)
+        public async Task<List<DataSet>> GetDataSetsByDataTypeAsync(string dataType)
         {
-            var device = await deviceCollection.Find(d => d.deviceName == deviceName).FirstOrDefaultAsync();
-            if (device == null) return new List<DataSet>();
+            var lowerCaseDataType = dataType.ToLower();
 
-            return await dataSetCollection.Find(ds => ds.deviceId == device._id).ToListAsync();
+            var devices = await deviceCollection.Find(d => d.valueType.Any(vt => vt.ToLower() == lowerCaseDataType)).ToListAsync();
+            Console.WriteLine($"Devices: {string.Join(", ", devices.Select(d => d.deviceName))}");
+
+            if (devices == null || devices.Count == 0)
+            {
+                return new List<DataSet>();
+            }
+
+            var deviceIds = devices.Select(d => d._id);
+            Console.WriteLine("DeviceId is: " + deviceIds);
+            var dataSets = await dataSetCollection.Find(ds => ds.dataType.ToLower() == lowerCaseDataType).ToListAsync();
+
+            Console.WriteLine($"DataSets Count: {dataSets.Count}");
+
+            return dataSets;
         }
 
         public async Task<Users> FindByUsernameAsync(string username)

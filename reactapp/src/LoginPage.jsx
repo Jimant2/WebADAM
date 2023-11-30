@@ -73,7 +73,8 @@ function LoginPage() {
             } else {
                 const errorData = await response.text();
                 console.error('Error logging in:', errorData);
-                alert("Incorrect login credentials!")
+                alert("Error during login!")
+
             }
         } catch (error) {
             console.error('Error logging in:', error);

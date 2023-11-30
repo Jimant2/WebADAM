@@ -6,12 +6,18 @@ import { ProjectTypesModal } from './ProjectTypesModal';
 import { getAllDevices } from '@/Controller/APIController';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+/*import LoginPage from '../LoginPage';*/
+
+
 
 
 function Header({ onDeviceSelect }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [deviceNames, setDeviceNames] = useState([]);
+    const navigate = useNavigate();
     //const fileInputRef = React.useRef(null);
 
     const handleClickOpenProjectType = async () => {
@@ -24,6 +30,7 @@ function Header({ onDeviceSelect }) {
         }
         handleClose();
     };
+
     const handleSelectDevice = (deviceName) => {
         if (deviceName && typeof onDeviceSelect === 'function') {
             onDeviceSelect(deviceName);
@@ -37,6 +44,18 @@ function Header({ onDeviceSelect }) {
     const handleClose = () => {
         setAnchorEl(null);
     };
+  
+    const handleLogout = async () => {
+        try {
+            await axios.post('/AuthController/logout');
+            navigate('/');
+            console.log('Logout successful');
+        } catch (error) {
+            // Handle logout failure
+            console.error('Logout failed', error);
+        }
+    };
+ 
 
     return (
         <header>
@@ -51,8 +70,11 @@ function Header({ onDeviceSelect }) {
                 <MenuItem onClick={handleClickOpenProjectType}>Open Project Type</MenuItem>
                 <MenuItem onClick={handleClose}>Save</MenuItem>
                 <MenuItem onClick={() => { }}>Export</MenuItem>
+                <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
+            <div>
 
+            </div>
             <ProjectTypesModal
                 open={modalOpen}
                 onClose={() => setModalOpen(false)}

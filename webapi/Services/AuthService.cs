@@ -1,10 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
-using System.Security.Claims;
-using System.Security.Cryptography;
-using System.Xml.Serialization;
+﻿using System.Security.Claims;
 using webapi.DataRepos;
-using webapi.LicenseModels;
-
 namespace webapi.Services
 {
     public class AuthService : IAuthService
@@ -23,7 +18,7 @@ namespace webapi.Services
             if (user != null && PasswordHasher.Verify(password, user.Password))
             {
                 var license = user.LicenseXml;
-
+                if(user.LicenseXml.User.Expires >  DateTime.UtcNow) { 
                 var claims = new List<Claim>
         {
             new Claim(ClaimTypes.Name, license.User.UserName)
@@ -39,6 +34,7 @@ namespace webapi.Services
 
                 var identity = new ClaimsIdentity(claims, "custom", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
                 return new ClaimsPrincipal(identity);
+            }
             }
 
             return null;

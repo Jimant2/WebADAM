@@ -105,8 +105,7 @@ class App extends Component {
         return `${date.getHours().toString().padStart(2, '0')}:${date.getMinutes().toString().padStart(2, '0')}:${date.getSeconds().toString().padStart(2, '0')}`;
     }
 
-   
-
+  
     handleDropOnGraph = (index) => async (e) => {
         e.preventDefault();
         const channelId = parseInt(e.dataTransfer.getData("text/plain"), 10);
@@ -252,7 +251,6 @@ class App extends Component {
             </div>
         );
     }
-
     render() {
         return (
             <Routes>
@@ -270,5 +268,6 @@ function Main() {
         </Router>
     );
 }
+
 
 export default Main;

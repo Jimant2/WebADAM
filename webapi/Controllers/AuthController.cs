@@ -29,5 +29,12 @@ namespace webapi.Controllers
 
             return Unauthorized();
         }
+
+        [HttpPost("logout")]
+        public async Task<IActionResult> Logout()
+        {
+            await HttpContext.SignOutAsync("CookieAuth");
+            return Ok(new { message = "Logout successful" });
+        }
     }
 }

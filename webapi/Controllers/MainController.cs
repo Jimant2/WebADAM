@@ -64,7 +64,6 @@ public class MainController : ControllerBase
         {
             return StatusCode(500, "Internal server error.");
         }
-
     }
 
     [HttpGet]

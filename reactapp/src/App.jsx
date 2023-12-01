@@ -47,34 +47,27 @@ class App extends Component {
             !currentDevice.channelXml.channelDefinition.channels)
             return `Unnamed Channel ${id}`;
 
-        // First, try to find the id in numericChannels
         let matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === id);
 
-        // If not found in numericChannels, try textChannels
         if (!matchedChannel) {
             matchedChannel = currentDevice.channelXml.channelDefinition.channels.textChannels.find(channel => channel.id === id);
         }
-
-        // If a matched channel is found, return its name, otherwise return the default
         
         return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
     };
     getChannelColorById = () => {
         const { selectedChannelId, devices, selectedDeviceName } = this.state;
 
-        // Use selectedChannelId directly
         const currentDevice = devices.find(device => device.deviceName === selectedDeviceName);
 
         if (!currentDevice ||
             !currentDevice.channelXml ||
             !currentDevice.channelXml.channelDefinition ||
             !currentDevice.channelXml.channelDefinition.channels)
-            return '#8884d8'; // Return the default color when data is not available
+            return '#8884d8'; 
 
-        // First, try to find the id in numericChannels
         const matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === selectedChannelId);
 
-        // If a matched channel is found, return its color, otherwise return the default
         return matchedChannel ? matchedChannel.color : '#8884d8';
     };
 
@@ -98,7 +91,7 @@ class App extends Component {
         return <span>Device: {devices[0]?.deviceName || 'None'}</span>
     }
     renderGroupTree = () => {
-        const currentDeviceName = this.state.selectedDeviceName; // Use the state's device name
+        const currentDeviceName = this.state.selectedDeviceName;
         console.log("currentDeviceName: ", currentDeviceName);
 
       const handleDragStart = (e, channelId) => {
@@ -145,23 +138,20 @@ class App extends Component {
         const channelId = parseInt(e.dataTransfer.getData("text/plain"), 10);
         this.setState({ selectedChannelId: channelId })
         try {
-            // Retrieve the channelName using await
             const channelName = this.lookupNameByChannelId(channelId);
             console.log(`Fetching data for graph ${index + 1}, channelName is:`, channelName);
 
             this.setState({ loadingDatasets: true });
 
-            // Use channelName directly in the fetchDatasetsByDataType function
             const { data, dataType } = await fetchDatasetsByDataType(channelName);
             console.log('Fetched data:', data);
 
-            // Aggregate the data based on the selected interval
             const interval = this.state.aggregationInterval;
             const aggregatedData = [];
             const dataByInterval = {};
 
             data.forEach(point => {
-                const intervalKey = Math.floor(point.timestamp / interval) * interval; // Group by the selected interval
+                const intervalKey = Math.floor(point.timestamp / interval) * interval;
 
                 if (!dataByInterval[intervalKey]) {
                     dataByInterval[intervalKey] = [];
@@ -205,7 +195,7 @@ class App extends Component {
                         .then(response => {
                             const data = response.map(group => ({
                                 ...group,
-                                isExpanded: false // initialize with expanded state
+                                isExpanded: false
                             })) || [];
                             console.log('Complete API response:', response);
                             this.setState({ groupsAndChannels: data });
@@ -241,7 +231,6 @@ class App extends Component {
         }
     }
     handleLogout = () => {
-        // Reset the state to its initial values
         this.setState({
             datasets: [{ data: [], dataType: '', lineColor: null }, { data: [], dataType: '', lineColor: null }],
             devices: [],
@@ -285,14 +274,14 @@ class App extends Component {
                             </select>
                         </div>
                         <div className="graph"
-                            onDrop={this.handleDropOnGraph(0)}  // Pass the index here
+                            onDrop={this.handleDropOnGraph(0)} 
                             onDragOver={(e) => e.preventDefault()}>
                             <GraphVisualization data={datasets[0].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[0].dataType} lineColor={this.state.datasets[0].lineColor} />
                         </div>
                         <div className="graph"
-                            onDrop={this.handleDropOnGraph(1)} // Pass the index here
+                            onDrop={this.handleDropOnGraph(1)} 
                             onDragOver={(e) => e.preventDefault()}>
-                            <GraphVisualization data={datasets[1].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[1].dataType} lineColor={this.rgbToHex(this.getChannelColorById(1))}/>
+                            <GraphVisualization data={datasets[1].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[1].dataType} lineColor={this.state.datasets[1].lineColor} />
                         </div>
                     </div>
                 </div>

@@ -26,7 +26,7 @@ class App extends Component {
     static displayName = App.name;
 
     state = {
-        datasets: [{ data: [], dataType: '' }, { data: [], dataType: '' }],
+        datasets: [{ data: [], dataType: '', lineColor: null}, { data: [], dataType: '', lineColor: null }],
         devices: [],
         loadingDevices: false,
         loadingDatasets: false,
@@ -35,6 +35,7 @@ class App extends Component {
         selectedDeviceName: null,
         valueType: '',
         dataType: '',
+        selectedChannelId: ''
     };
 
     lookupNameByChannelId = (id) => {
@@ -55,11 +56,43 @@ class App extends Component {
         }
 
         // If a matched channel is found, return its name, otherwise return the default
+        
         return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
+    };
+    getChannelColorById = () => {
+        const { selectedChannelId, devices, selectedDeviceName } = this.state;
 
+        // Use selectedChannelId directly
+        const currentDevice = devices.find(device => device.deviceName === selectedDeviceName);
+
+        if (!currentDevice ||
+            !currentDevice.channelXml ||
+            !currentDevice.channelXml.channelDefinition ||
+            !currentDevice.channelXml.channelDefinition.channels)
+            return '#8884d8'; // Return the default color when data is not available
+
+        // First, try to find the id in numericChannels
+        const matchedChannel = currentDevice.channelXml.channelDefinition.channels.numericChannels.find(channel => channel.id === selectedChannelId);
+
+        // If a matched channel is found, return its color, otherwise return the default
+        return matchedChannel ? matchedChannel.color : '#8884d8';
     };
 
+    rgbToHex(rgb) {
+        const toHex = (value) => {
+            if (typeof value !== 'undefined') {
+                const hex = value.toString(16);
+                return hex.length === 1 ? '0' + hex : hex;
+            }
+            return '00';
+        };
 
+        const red = toHex(rgb.red);
+        const green = toHex(rgb.green);
+        const blue = toHex(rgb.blue);
+
+        return `#${red}${green}${blue}`;
+    }
 
     renderDevices = (devices) => {
         return <span>Device: {devices[0]?.deviceName || 'None'}</span>
@@ -110,6 +143,7 @@ class App extends Component {
     handleDropOnGraph = (index) => async (e) => {
         e.preventDefault();
         const channelId = parseInt(e.dataTransfer.getData("text/plain"), 10);
+        this.setState({ selectedChannelId: channelId })
         try {
             // Retrieve the channelName using await
             const channelName = this.lookupNameByChannelId(channelId);
@@ -145,7 +179,7 @@ class App extends Component {
 
             this.setState(prevState => {
                 const newDatasets = [...prevState.datasets];
-                newDatasets[index] = { data: aggregatedData, dataType: dataType };
+                newDatasets[index] = { data: aggregatedData, dataType: dataType, lineColor: this.rgbToHex(this.getChannelColorById(index))};
                 return { datasets: newDatasets, loadingDatasets: false };
             });
         } catch (error) {
@@ -206,7 +240,21 @@ class App extends Component {
             console.error('Failed to fetch devices:', error);
         }
     }
-
+    handleLogout = () => {
+        // Reset the state to its initial values
+        this.setState({
+            datasets: [{ data: [], dataType: '', lineColor: null }, { data: [], dataType: '', lineColor: null }],
+            devices: [],
+            loadingDevices: false,
+            loadingDatasets: false,
+            aggregationInterval: 60 * 1000,
+            groupsAndChannels: [],
+            selectedDeviceName: null,
+            valueType: '',
+            dataType: '',
+            selectedChannelId: ''
+        });
+    };
     renderMainApp = () => {
         const { devices, loadingDevices, datasets } = this.state;
 
@@ -214,7 +262,7 @@ class App extends Component {
 
         return (
             <div className="app-container">
-                <Header onDeviceSelect={this.handleDeviceSelection} />
+                <Header onDeviceSelect={this.handleDeviceSelection} onLogout={this.handleLogout}/>
                 <div className="content-container">
                     <div className="devices-container">
                         {this.renderGroupTree()}
@@ -239,12 +287,12 @@ class App extends Component {
                         <div className="graph"
                             onDrop={this.handleDropOnGraph(0)}  // Pass the index here
                             onDragOver={(e) => e.preventDefault()}>
-                            <GraphVisualization data={datasets[0].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[0].dataType || "value"} />
+                            <GraphVisualization data={datasets[0].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[0].dataType} lineColor={this.state.datasets[0].lineColor} />
                         </div>
                         <div className="graph"
                             onDrop={this.handleDropOnGraph(1)} // Pass the index here
                             onDragOver={(e) => e.preventDefault()}>
-                            <GraphVisualization data={datasets[1].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[1].dataType || "value"} />
+                            <GraphVisualization data={datasets[1].data} formatTimestampToTime={this.formatTimestampToTime} dataType={datasets[1].dataType} lineColor={this.rgbToHex(this.getChannelColorById(1))}/>
                         </div>
                     </div>
                 </div>

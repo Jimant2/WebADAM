@@ -8,12 +8,13 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import './Header.css';
 /*import LoginPage from '../LoginPage';*/
 
 
 
 
-function Header({ onDeviceSelect }) {
+function Header({ onDeviceSelect, onLogout }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [deviceNames, setDeviceNames] = useState([]);
@@ -50,6 +51,9 @@ function Header({ onDeviceSelect }) {
             await axios.post('/AuthController/logout');
             navigate('/');
             console.log('Logout successful');
+            if (typeof onLogout === 'function') {
+                onLogout();
+            }
         } catch (error) {
             // Handle logout failure
             console.error('Logout failed', error);
@@ -134,7 +138,8 @@ function Header({ onDeviceSelect }) {
     );
 }
 Header.propTypes = {
-    onDeviceSelect: PropTypes.func.isRequired
+    onDeviceSelect: PropTypes.func.isRequired,
+    onLogout: PropTypes.func,
 };
 
 export default Header;

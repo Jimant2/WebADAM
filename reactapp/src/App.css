@@ -2,7 +2,8 @@
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    min-width:150vh;
+    min-width: 150vh;
+    background: linear-gradient(90deg,#1a84d4,#00269c );
 }
 
 .content-container {

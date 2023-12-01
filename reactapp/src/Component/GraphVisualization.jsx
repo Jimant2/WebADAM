@@ -3,16 +3,18 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Brush } from 'recharts';
+import './GraphVisualization.css';
 
-const GraphVisualization = ({ data, dataType, formatTimestampToTime }) => {
+const GraphVisualization = ({ data, dataType, formatTimestampToTime, lineColor}) => {
     console.log("Received Data:", data, "DataType:", dataType);
+    console.log("Received lineColor: ", lineColor);
 
     // Custom Tooltip Component
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
                 <div className="custom-tooltip">
-                    <p className="label">{`Timestamp: ${formatTimestampToTime(label)}`}</p>
+                    <p className="label custom-timestamp">{`Timestamp: ${formatTimestampToTime(label)}`}</p>
                     <p className="value">{`${payload[0].name} : ${payload[0].value}`}</p>
                 </div>
             );
@@ -32,7 +34,7 @@ const GraphVisualization = ({ data, dataType, formatTimestampToTime }) => {
                 <YAxis />
                 <Tooltip content={<CustomTooltip />} /> {/* Use the CustomTooltip here */}
                 <Legend />
-                <Line type="monotone" dataKey={dataType} stroke="#8884d8" activeDot={{ r: 8 }} />
+                <Line type="monotone" dataKey={dataType} stroke={ lineColor } activeDot={{ r: 8 }} />
                 <Brush dataKey="timestamp" height={30} stroke="#8884d8" tickFormatter={formatTimestampToTime} />
             </LineChart>
         </ResponsiveContainer>
@@ -43,6 +45,7 @@ GraphVisualization.propTypes = {
     data: PropTypes.array.isRequired,
     dataType: PropTypes.string,
     formatTimestampToTime: PropTypes.func.isRequired,
+    lineColor: PropTypes.string,
 };
 
 

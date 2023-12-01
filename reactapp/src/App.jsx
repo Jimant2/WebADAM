@@ -56,6 +56,7 @@ class App extends Component {
 
         // If a matched channel is found, return its name, otherwise return the default
         return matchedChannel ? matchedChannel.name : `Unnamed Channel ${id}`;
+
     };
 
 

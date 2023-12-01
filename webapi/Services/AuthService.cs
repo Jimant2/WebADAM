@@ -18,29 +18,39 @@ namespace webapi.Services
             if (user != null && PasswordHasher.Verify(password, user.Password))
             {
                 var license = user.LicenseXml;
-                if(user.LicenseXml.User.Expires >  DateTime.UtcNow) { 
-                var claims = new List<Claim>
-        {
-            new Claim(ClaimTypes.Name, license.User.UserName)
-        };
-
-                if (license.Roles != null)
+                if (license.User.Expires > DateTime.UtcNow)
                 {
-                    foreach (var role in license.Roles.Role) 
-                    {
-                        claims.Add(new Claim(ClaimTypes.Role, role));
-                    }
-                }
+                    var claims = new List<Claim>
+            {
+                new Claim(ClaimTypes.Name, license.User.UserName)
+            };
 
-                var identity = new ClaimsIdentity(claims, "custom", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
-                return new ClaimsPrincipal(identity);
-            }
+                    if (license.Roles != null)
+                    {
+                        foreach (var role in license.Roles.Role)
+                        {
+                            claims.Add(new Claim(ClaimTypes.Role, role));
+
+                            if (role == "Administrator")
+                            {
+                                claims.Add(new Claim("CanAccessEverything", "true"));
+                            }
+                            else if (role == "DataAnalyzer")
+                            {
+                                // Add additional claims for DataAnalyzer role
+                                claims.Add(new Claim("CanAccessLimitedData", "true"));
+                            }
+                        }
+                    }
+                    var identity = new ClaimsIdentity(claims, "custom", ClaimsIdentity.DefaultNameClaimType, ClaimsIdentity.DefaultRoleClaimType);
+                    return new ClaimsPrincipal(identity);
+                }
             }
 
             return null;
         }
 
-     
+
     }
 
 }

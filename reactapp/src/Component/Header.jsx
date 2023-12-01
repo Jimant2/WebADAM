@@ -55,7 +55,57 @@ function Header({ onDeviceSelect }) {
             console.error('Logout failed', error);
         }
     };
- 
+    const handleUpload = async () => {
+        // Create a promise to resolve when the file input changes
+        const fileInputChangePromise = new Promise(resolve => {
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.addEventListener('change', () => resolve(fileInput.files[0]));
+            fileInput.click();
+        });
+
+        // Wait for the file input change
+        const file = await fileInputChangePromise;
+
+        if (!file) {
+            console.error("No file selected");
+            return;
+        }
+
+        // Prompt for the data type
+        const dataType = window.prompt('Please enter the data type:');
+        if (!dataType || dataType.trim() === '') {
+            alert('Data type is required.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const requestUrl = `/MainController/uploadFile?dataType=${encodeURIComponent(dataType)}`;
+
+        try {
+            const response = await fetch(requestUrl, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (response.ok) {
+                console.log('File uploaded successfully');
+                alert("File uploaded!")
+            } else {
+                console.error('Error response:', response);
+                const errorData = await response.json();
+                console.error('Error data:', errorData);
+                alert(`Error uploading file: ${errorData.message || 'Unknown error'}`);
+            }
+        } catch (error) {
+            console.error('Error uploading file:', error);
+            alert(`Error uploading file: ${error.message}`);
+        }
+    };
+
+
 
     return (
         <header>
@@ -68,7 +118,7 @@ function Header({ onDeviceSelect }) {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}>
                 <MenuItem onClick={handleClickOpenProjectType}>Open Project Type</MenuItem>
-                <MenuItem onClick={handleClose}>Save</MenuItem>
+                <MenuItem onClick={handleUpload}>Upload Data</MenuItem>
                 <MenuItem onClick={() => { }}>Export</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>

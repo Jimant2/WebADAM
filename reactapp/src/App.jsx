@@ -41,6 +41,10 @@ class App extends Component {
         selectedChannelId: '',
         isTimestampModalOpen: false,
         timestampModalData: [],
+        timestampModals: [
+            { isOpen: false, data: [] },
+            { isOpen: false, data: [] },
+        ],
     };
 
     lookupNameByChannelId = (id) => {
@@ -138,50 +142,7 @@ class App extends Component {
     }
 
   
-    //handleDropOnGraph = (index) => async (e) => {
-    //    e.preventDefault();
-    //    const channelId = parseInt(e.dataTransfer.getData("text/plain"), 10);
-    //    this.setState({ selectedChannelId: channelId })
-    //    try {
-    //        const channelName = this.lookupNameByChannelId(channelId);
-    //        console.log(`Fetching data for graph ${index + 1}, channelName is:`, channelName);
-
-    //        this.setState({ loadingDatasets: true });
-
-    //        const { data, dataType } = await fetchDatasetsByDataType(channelName);
-    //        console.log('Fetched data:', data);
-
-    //        const interval = this.state.aggregationInterval;
-    //        const aggregatedData = [];
-    //        const dataByInterval = {};
-
-    //        data.forEach(point => {
-    //            const intervalKey = Math.floor(point.timestamp / interval) * interval;
-
-    //            if (!dataByInterval[intervalKey]) {
-    //                dataByInterval[intervalKey] = [];
-    //            }
-    //            dataByInterval[intervalKey].push(point);
-    //        });
-
-    //        for (const intervalStart in dataByInterval) {
-    //            const points = dataByInterval[intervalStart];
-    //            const avgValue = Math.round(points.reduce((sum, point) => sum + point[dataType], 0) / points.length);
-    //            aggregatedData.push({ timestamp: Number(intervalStart), [dataType]: avgValue });
-    //        }
-
-    //        console.log("Aggregated Data:", aggregatedData);
-
-    //        this.setState(prevState => {
-    //            const newDatasets = [...prevState.datasets];
-    //            newDatasets[index] = { data: aggregatedData, dataType: dataType, lineColor: this.rgbToHex(this.getChannelColorById(index))};
-    //            return { datasets: newDatasets, loadingDatasets: false };
-    //        });
-    //    } catch (error) {
-    //        console.error(error);
-    //        this.setState({ loadingDatasets: false });
-    //    }
-    //}
+   
 
     handleDropOnGraph = (index) => async (e) => {
         e.preventDefault();
@@ -196,11 +157,10 @@ class App extends Component {
             const timestamps = await fetchTimestampsByDataType(channelName);
             console.log('Fetched timestamps:', timestamps);
 
-            this.setState({
-                isTimestampModalOpen: true,
-                timestampModalData: timestamps,
-                loadingDatasets: false,
-                selectedTimestamp: null, // Reset selectedTimestamp
+            this.setState((prevState) => {
+                const newTimestampModals = [...prevState.timestampModals];
+                newTimestampModals[index] = { isOpen: true, data: timestamps };
+                return { timestampModals: newTimestampModals };
             });
         } catch (error) {
             console.error(error);
@@ -212,7 +172,7 @@ class App extends Component {
     handleTimestampSelect = (index) => async (selectedTimestamp, newWindow) => {
         try {
             this.setState({ isTimestampModalOpen: false, loadingDatasets: true });
-
+            this.setState({ loadingDatasets: true });
             // Fetch datasets based on the selected timestamp
             const { data, dataType } = await fetchDatasetsByTimestamp(selectedTimestamp);
 
@@ -241,7 +201,7 @@ class App extends Component {
             // Close the new window
             newWindow.close();
 
-            this.setState(prevState => {
+            this.setState((prevState) => {
                 const newDatasets = [...prevState.datasets];
                 newDatasets[index] = { data: aggregatedData, dataType: dataType, lineColor: this.rgbToHex(this.getChannelColorById(index)) };
                 return { datasets: newDatasets, loadingDatasets: false };
@@ -318,6 +278,13 @@ class App extends Component {
             selectedChannelId: ''
         });
     };
+    handleTimestampModalClose = (index) => {
+        this.setState((prevState) => {
+            const newTimestampModals = [...prevState.timestampModals];
+            newTimestampModals[index] = { isOpen: false, data: [] };
+            return { timestampModals: newTimestampModals };
+        });
+    };
     renderMainApp = () => {
         const { devices, loadingDevices, datasets } = this.state;
 
@@ -348,12 +315,15 @@ class App extends Component {
                                 {/* Add more options as needed */}
                             </select>
                         </div>
-                        <TimestampModal
-                            isOpen={this.state.isTimestampModalOpen}
-                            onClose={() => this.setState({ isTimestampModalOpen: false })}
-                            timestamps={this.state.timestampModalData}
-                            onSelectTimestamp={this.handleTimestampSelect}
-                        />
+                        {this.state.timestampModals.map((modal, index) => (
+                            <TimestampModal
+                                key={index}
+                                isOpen={modal.isOpen}
+                                onClose={() => this.handleTimestampModalClose(index)}
+                                timestamps={modal.data}
+                                onSelectTimestamp={this.handleTimestampSelect(index)}
+                            />
+                        ))}
                         <div className="graph"
                             onDrop={this.handleDropOnGraph(0)} 
                             onDragOver={(e) => e.preventDefault()}>
@@ -378,7 +348,6 @@ class App extends Component {
             </Routes>
         );
     }
-
 }
 function Main() {
     return (
@@ -387,6 +356,5 @@ function Main() {
         </Router>
     );
 }
-
 
 export default Main;

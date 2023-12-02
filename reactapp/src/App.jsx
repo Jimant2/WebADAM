@@ -275,7 +275,13 @@ class App extends Component {
             selectedDeviceName: null,
             valueType: '',
             dataType: '',
-            selectedChannelId: ''
+            selectedChannelId: '',
+            isTimestampModalOpen: false,
+            timestampModalData: [],
+            timestampModals: [
+                { isOpen: false, data: [] },
+                { isOpen: false, data: [] },
+            ],
         });
     };
     handleTimestampModalClose = (index) => {

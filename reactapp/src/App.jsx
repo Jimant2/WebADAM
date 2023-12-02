@@ -4,11 +4,14 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import LoginPage from './LoginPage';
 import GraphVisualization from './Component/GraphVisualization';
-import { fetchDatasetsByDataType, fetchGroupsAndChannels, getAllDevices, getDeviceByName } from './Controller/APIController';
+import {
+    fetchDatasetsByDataType, fetchGroupsAndChannels, getAllDevices, getDeviceByName, fetchTimestampsByDataType
+    , fetchDatasetsByTimestamp } from './Controller/APIController';
 import Header from './Component/Header';
 import Footer from './Component/Footer';
 import './App.css';
 import { BiAtom } from 'react-icons/bi';
+import TimestampModal from './Component/TimestampsModal';
 
 export function AppWrapper() {
     const navigate = useNavigate();
@@ -35,7 +38,9 @@ class App extends Component {
         selectedDeviceName: null,
         valueType: '',
         dataType: '',
-        selectedChannelId: ''
+        selectedChannelId: '',
+        isTimestampModalOpen: false,
+        timestampModalData: [],
     };
 
     lookupNameByChannelId = (id) => {
@@ -133,19 +138,85 @@ class App extends Component {
     }
 
   
+    //handleDropOnGraph = (index) => async (e) => {
+    //    e.preventDefault();
+    //    const channelId = parseInt(e.dataTransfer.getData("text/plain"), 10);
+    //    this.setState({ selectedChannelId: channelId })
+    //    try {
+    //        const channelName = this.lookupNameByChannelId(channelId);
+    //        console.log(`Fetching data for graph ${index + 1}, channelName is:`, channelName);
+
+    //        this.setState({ loadingDatasets: true });
+
+    //        const { data, dataType } = await fetchDatasetsByDataType(channelName);
+    //        console.log('Fetched data:', data);
+
+    //        const interval = this.state.aggregationInterval;
+    //        const aggregatedData = [];
+    //        const dataByInterval = {};
+
+    //        data.forEach(point => {
+    //            const intervalKey = Math.floor(point.timestamp / interval) * interval;
+
+    //            if (!dataByInterval[intervalKey]) {
+    //                dataByInterval[intervalKey] = [];
+    //            }
+    //            dataByInterval[intervalKey].push(point);
+    //        });
+
+    //        for (const intervalStart in dataByInterval) {
+    //            const points = dataByInterval[intervalStart];
+    //            const avgValue = Math.round(points.reduce((sum, point) => sum + point[dataType], 0) / points.length);
+    //            aggregatedData.push({ timestamp: Number(intervalStart), [dataType]: avgValue });
+    //        }
+
+    //        console.log("Aggregated Data:", aggregatedData);
+
+    //        this.setState(prevState => {
+    //            const newDatasets = [...prevState.datasets];
+    //            newDatasets[index] = { data: aggregatedData, dataType: dataType, lineColor: this.rgbToHex(this.getChannelColorById(index))};
+    //            return { datasets: newDatasets, loadingDatasets: false };
+    //        });
+    //    } catch (error) {
+    //        console.error(error);
+    //        this.setState({ loadingDatasets: false });
+    //    }
+    //}
+
     handleDropOnGraph = (index) => async (e) => {
         e.preventDefault();
         const channelId = parseInt(e.dataTransfer.getData("text/plain"), 10);
-        this.setState({ selectedChannelId: channelId })
+        this.setState({ selectedChannelId: channelId });
+
         try {
             const channelName = this.lookupNameByChannelId(channelId);
-            console.log(`Fetching data for graph ${index + 1}, channelName is:`, channelName);
+            console.log(`Fetching timestamps for graph ${index + 1}, channelName is:`, channelName);
 
-            this.setState({ loadingDatasets: true });
+            // Fetch timestamps for the selected channelName
+            const timestamps = await fetchTimestampsByDataType(channelName);
+            console.log('Fetched timestamps:', timestamps);
 
-            const { data, dataType } = await fetchDatasetsByDataType(channelName);
-            console.log('Fetched data:', data);
+            this.setState({
+                isTimestampModalOpen: true,
+                timestampModalData: timestamps,
+                loadingDatasets: false,
+                selectedTimestamp: null, // Reset selectedTimestamp
+            });
+        } catch (error) {
+            console.error(error);
+            this.setState({ loadingDatasets: false });
+        }
+    };
 
+
+    handleTimestampSelect = (index) => async (selectedTimestamp, newWindow) => {
+        try {
+            this.setState({ isTimestampModalOpen: false, loadingDatasets: true });
+
+            // Fetch datasets based on the selected timestamp
+            const { data, dataType } = await fetchDatasetsByTimestamp(selectedTimestamp);
+
+            // Process the fetched datasets as needed
             const interval = this.state.aggregationInterval;
             const aggregatedData = [];
             const dataByInterval = {};
@@ -167,16 +238,19 @@ class App extends Component {
 
             console.log("Aggregated Data:", aggregatedData);
 
+            // Close the new window
+            newWindow.close();
+
             this.setState(prevState => {
                 const newDatasets = [...prevState.datasets];
-                newDatasets[index] = { data: aggregatedData, dataType: dataType, lineColor: this.rgbToHex(this.getChannelColorById(index))};
+                newDatasets[index] = { data: aggregatedData, dataType: dataType, lineColor: this.rgbToHex(this.getChannelColorById(index)) };
                 return { datasets: newDatasets, loadingDatasets: false };
             });
         } catch (error) {
             console.error(error);
             this.setState({ loadingDatasets: false });
         }
-    }
+    };
 
     handleDeviceSelection = async (deviceName) => {
         console.log("Device selected App.jsx:", deviceName);
@@ -247,6 +321,7 @@ class App extends Component {
     renderMainApp = () => {
         const { devices, loadingDevices, datasets } = this.state;
 
+
         let deviceContent = loadingDevices ? <p>Loading the devices...</p> : this.renderDevices(devices);
 
         return (
@@ -273,6 +348,12 @@ class App extends Component {
                                 {/* Add more options as needed */}
                             </select>
                         </div>
+                        <TimestampModal
+                            isOpen={this.state.isTimestampModalOpen}
+                            onClose={() => this.setState({ isTimestampModalOpen: false })}
+                            timestamps={this.state.timestampModalData}
+                            onSelectTimestamp={this.handleTimestampSelect}
+                        />
                         <div className="graph"
                             onDrop={this.handleDropOnGraph(0)} 
                             onDragOver={(e) => e.preventDefault()}>

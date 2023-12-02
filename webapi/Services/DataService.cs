@@ -28,6 +28,16 @@ namespace webapi.Services
         {
             return await _repository.GetDataSetsByDataTypeAsync(dataType);
         }
+
+        public async Task<IEnumerable<DateTime>> GetTimestampsByDataTypeFromServiceAsync(string dataType)
+        {
+            return await _repository.GetTimestampsByDataTypeAsync(dataType);
+        }
+        public async Task<IEnumerable<DataSet>> GetDataSetByTimestampFromServiceAsync(DateTime timestamp)
+        {
+            return await _repository.GetDataSetsByTimestampAsync(timestamp);
+        }
+
         public async Task<List<DataSet>> UploadFileFromService(IFormFile file, string dataType)
         {
             try

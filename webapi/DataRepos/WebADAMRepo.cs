@@ -76,9 +76,7 @@ namespace webapi.DataRepos
         public async Task<List<DataSet>> GetDataSetsByDataTypeAsync(string dataType)
         {
             var lowerCaseDataType = dataType.ToLower();
-
             var devices = await deviceCollection.Find(d => d.valueType.Any(vt => vt.ToLower() == lowerCaseDataType)).ToListAsync();
-            Console.WriteLine($"Devices: {string.Join(", ", devices.Select(d => d.deviceName))}");
 
             if (devices == null || devices.Count == 0)
             {
@@ -86,13 +84,31 @@ namespace webapi.DataRepos
             }
 
             var deviceIds = devices.Select(d => d._id);
-            Console.WriteLine("DeviceId is: " + deviceIds);
             var dataSets = await dataSetCollection.Find(ds => ds.dataType.ToLower() == lowerCaseDataType).ToListAsync();
-
-            Console.WriteLine($"DataSets Count: {dataSets.Count}");
 
             return dataSets;
         }
+
+        public async Task<IEnumerable<DateTime>> GetTimestampsByDataTypeAsync(string dataType)
+        {
+            var filter = Builders<DataSet>.Filter.Eq("dataType", dataType);
+
+            var dataSetList = await dataSetCollection.Find(filter).ToListAsync();
+
+            var uniqueTimestamps = dataSetList.Select(d => d.timestamp).Distinct();
+
+            return uniqueTimestamps;
+        }
+
+        public async Task<IEnumerable<DataSet>> GetDataSetsByTimestampAsync(DateTime timestamp)
+        {
+            var filter = Builders<DataSet>.Filter.Eq("timestamp", timestamp);
+
+            var dataSetList = await dataSetCollection.Find(filter).ToListAsync();
+
+            return dataSetList;
+        }
+
 
         public async Task<Users> FindByUsernameAsync(string username)
         {
@@ -105,6 +121,5 @@ namespace webapi.DataRepos
 
             return device?.channelXml;
         }
-        //TODO: Make connection between device and datasets again
     }
 }

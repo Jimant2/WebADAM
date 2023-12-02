@@ -11,9 +11,6 @@ import axios from 'axios';
 import './Header.css';
 /*import LoginPage from '../LoginPage';*/
 
-
-
-
 function Header({ onDeviceSelect, onLogout }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [modalOpen, setModalOpen] = useState(false);

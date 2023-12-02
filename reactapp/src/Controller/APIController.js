@@ -29,7 +29,50 @@ export async function fetchDatasetsByDataType(dataType) {
     }
 }
 
+export async function fetchDatasetsByTimestamp(timestamp) {
+    const response = await fetch(`/MainController/dataSetByTimestamp/${timestamp}`);
 
+    if (response.ok) {
+        const dataSets = await response.json();
+
+        console.log('Received dataSets:', dataSets);
+
+        if (!Array.isArray(dataSets) || dataSets.length === 0) {
+            console.log('Unexpected dataSets format:', dataSets);
+            return { data: [], dataType: '' };
+        }
+
+        const allData = dataSets.flatMap(dataSet =>
+            dataSet.data.map(dataPoint => ({
+                timestamp: new Date(dataPoint.timestamp).getTime(),
+                [dataSet.dataType]: dataPoint.value
+            }))
+        );
+
+        allData.sort((a, b) => a.timestamp - b.timestamp);
+        return {
+            data: allData,
+            dataType: dataSets[0].dataType
+        };
+    } else {
+        const errorMessage = `Failed to fetch datasets: ${await response.text()}`;
+        throw new Error(errorMessage);
+    }
+}
+
+export async function fetchTimestampsByDataType(dataType) {
+    try {
+        const response = await fetch(`/MainController/timestampByDataType/${dataType}`);
+        if (response.ok) {
+            console.log(`Fetching timestamps by data type`, response);
+            const data = await response.json() || [];
+            return data;
+        }
+    } catch (error) {
+        console.error("Failed to grab the timestamps: ", error);
+        throw error;
+    }
+}
 
 export async function fetchGroupsAndChannels(deviceName) {
     try {
@@ -54,7 +97,9 @@ export async function getAllDevices() {
     }
 }
 
-    export async function getDeviceByName(deviceName) {
+
+
+export async function getDeviceByName(deviceName) {
         const requestUrl = `/MainController/getDeviceByName/?deviceName=${deviceName}`;
         const response = await fetch(requestUrl);
         if (response.headers.get("content-type")?.includes("application/json")) {

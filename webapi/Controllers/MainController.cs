@@ -84,6 +84,40 @@ public class MainController : ControllerBase
         }
     }
 
+    [HttpGet]
+    [Route("timestampByDataType/{dataType}")]
+    public async Task<ActionResult<IEnumerable<DateTime>>> GetTimestampByDataType(string dataType)
+    {
+        try
+        {
+            var data = await dataService.GetTimestampsByDataTypeFromServiceAsync(dataType);
+
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return BadRequest(ex.Message);
+        }
+    }
+
+    [HttpGet]
+    [Route("dataSetByTimestamp/{timestamp}")]
+    public async Task<ActionResult<IEnumerable<DataSet>>> GetDataSetByTimestamp(DateTime timestamp)
+    {
+        try
+        {
+            var data = await dataService.GetDataSetByTimestampFromServiceAsync(timestamp);
+
+            return Ok(data);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+            return BadRequest(ex.Message);
+        }
+    }
+
     //[HttpGet("dataLoader")]
     //public ActionResult<IEnumerable<DataLoader>> GetDataLoader()
     //{

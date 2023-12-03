@@ -5,6 +5,6 @@ namespace webapi.Services
     public class GroupChannelDTO
     {
         public string GroupName { get; set; }
-        public ChannelReference[] Channels { get; set; }
+        public List<ChannelReference> Channels { get; set; }
     }
 }

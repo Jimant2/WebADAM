@@ -1,5 +1,8 @@
 ﻿using System.Security.Claims;
 using webapi.DataRepos;
+using webapi.DefinitionModels;
+using webapi.LicenseModels;
+
 namespace webapi.Services
 {
     public class AuthService : IAuthService
@@ -21,9 +24,9 @@ namespace webapi.Services
                 if (license.User.Expires > DateTime.UtcNow)
                 {
                     var claims = new List<Claim>
-            {
-                new Claim(ClaimTypes.Name, license.User.UserName)
-            };
+                    {
+                        new Claim(ClaimTypes.Name, license.User.UserName),
+                    };
 
                     if (license.Roles != null)
                     {
@@ -37,7 +40,6 @@ namespace webapi.Services
                             }
                             else if (role == "DataAnalyzer")
                             {
-                                // Add additional claims for DataAnalyzer role
                                 claims.Add(new Claim("CanAccessLimitedData", "true"));
                             }
                         }
@@ -48,6 +50,28 @@ namespace webapi.Services
             }
 
             return null;
+        }
+        public List<ChannelReference> GetAuthorizedChannels(ChannelReference[] allChannels, License userLicense)
+        {
+            var authorizedChannels = new List<ChannelReference>();
+
+            foreach (var userDevice in userLicense.ChannelRestrictions.Device)
+            {
+                foreach (var build in userDevice.ExperimentBuilds.ExperimentBuild)
+                {
+                    foreach (var channel in build.Channels.Channel)
+                    {
+                        var existingChannel = allChannels.FirstOrDefault(c => c.Id == channel.Id);
+
+                        if (existingChannel != null && channel.Protection.ToString() == "Allowed")
+                        {
+                            authorizedChannels.Add(existingChannel);
+                        }
+                    }
+                }
+            }
+
+            return authorizedChannels;
         }
 
 

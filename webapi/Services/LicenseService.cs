@@ -29,5 +29,9 @@ namespace webapi.Services
 
             await _repository.AddLicenseXmlAsync(user);
         }
+        //public async Task<License> GetLicenseFromService()
+        //{
+
+        //}
     }
 }

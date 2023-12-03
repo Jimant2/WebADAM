@@ -12,6 +12,6 @@ namespace webapi.Models
 
         public string? deviceName { get; set; }
         public string[]? valueType { get; set; }
-        public Definition? channelXml { get; set; }
+        public Definition channelXml { get; set; }
     }
 }

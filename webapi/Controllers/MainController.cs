@@ -17,6 +17,7 @@ using System.Xml.Serialization;
 using System.Security.Cryptography;
 using webapi.DefinitionModels;
 using System.Linq.Expressions;
+using Amazon.Runtime.Internal;
 
 namespace webapi.Controllers;
 
@@ -206,7 +207,8 @@ public class MainController : ControllerBase
             return BadRequest("Device name is required.");
         }
 
-        var groupsAndChannels = await deviceService.GetDefinitionByDeviceName(deviceName);
+        var requestingUser = HttpContext.User;
+        var groupsAndChannels = await deviceService.GetDefinitionByDeviceName(deviceName, requestingUser);
 
         return Ok(groupsAndChannels);
     }

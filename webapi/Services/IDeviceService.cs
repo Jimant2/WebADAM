@@ -1,4 +1,6 @@
-﻿using webapi.DefinitionModels;
+﻿using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
+using webapi.DefinitionModels;
 using webapi.Models;
 
 namespace webapi.Services
@@ -11,7 +13,7 @@ namespace webapi.Services
 
         public Task<Device> GetDeviceByNameFromService(string deviceName);
         public Task AddDeviceDefinitionFromService(Definition definition);
-        public Task<List<GroupChannelDTO>> GetDefinitionByDeviceName(string deviceName);
+        public Task<List<GroupChannelDTO>> GetDefinitionByDeviceName(string deviceName, ClaimsPrincipal claimsPrincipal);
 
     }
 }

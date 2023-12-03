@@ -1,17 +1,22 @@
 ﻿using webapi.DefinitionModels;
 using webapi.DataRepos;
 using webapi.Models;
+using webapi.Services;
 using System;
+using Microsoft.AspNetCore.Identity;
+using System.Security.Claims;
 
 namespace webapi.Services
 {
     public class DeviceService : IDeviceService
     {
         private readonly IWebADAMRepo _repository;
+        private readonly IAuthService _authService;
 
-        public DeviceService(IWebADAMRepo repository)
+        public DeviceService(IWebADAMRepo repository, IAuthService authService)
         {
             _repository = repository;
+            _authService = authService;
         }
 
         //public async Task<List<Device>> GetAllDevicesFromService()
@@ -47,7 +52,28 @@ namespace webapi.Services
             };
             await _repository.AddChannelXmlAsync(device);
         }
-        public async Task<List<GroupChannelDTO>> GetDefinitionByDeviceName(string deviceName)
+
+        //public async Task<List<GroupChannelDTO>> GetDefinitionByDeviceName(string deviceName, ClaimsPrincipal claimsPrincipal)
+        //{
+        //    var definition = await _repository.GetDefinitionByDeviceNameAsync(deviceName);
+
+        //    var definitionGroups = new List<GroupChannelDTO>();
+
+        //    foreach (var group in definition.ChannelDefinition.Groups)
+        //    {
+        //         var user = await _repository.FindByUsernameAsync(claimsPrincipal.Identity.Name);
+
+        //            var dto = new GroupChannelDTO
+        //            {
+        //                GroupName = group.Name,
+        //                Channels = _authService.GetAuthorizedChannels(group.Channels, user.LicenseXml)
+        //            };
+        //            definitionGroups.Add(dto);
+        //    }
+
+        //   return definitionGroups;
+        //}
+        public async Task<List<GroupChannelDTO>> GetDefinitionByDeviceName(string deviceName, ClaimsPrincipal claimsPrincipal)
         {
             var definition = await _repository.GetDefinitionByDeviceNameAsync(deviceName);
 
@@ -55,16 +81,28 @@ namespace webapi.Services
 
             foreach (var group in definition.ChannelDefinition.Groups)
             {
+                var user = await _repository.FindByUsernameAsync(claimsPrincipal.Identity.Name);
+
                 var dto = new GroupChannelDTO
                 {
                     GroupName = group.Name,
-                    Channels = group.Channels
                 };
+
+                if (claimsPrincipal.IsInRole("Administrator"))
+                {
+                    dto.Channels = group.Channels.ToList();
+                }
+                else
+                {
+                    dto.Channels = _authService.GetAuthorizedChannels(group.Channels, user.LicenseXml);
+                }
+
                 definitionGroups.Add(dto);
             }
 
             return definitionGroups;
         }
+
 
     }
 }

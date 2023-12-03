@@ -4,6 +4,7 @@ using Newtonsoft.Json.Linq;
 using webapi.Models;
 using webapi.DefinitionModels;
 using MongoDB.Bson;
+using webapi.LicenseModels;
 
 namespace webapi.DataRepos
 {
@@ -121,5 +122,6 @@ namespace webapi.DataRepos
 
             return device?.channelXml;
         }
+
     }
 }

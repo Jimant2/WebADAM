@@ -9,14 +9,12 @@ import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import './Header.css';
-/*import LoginPage from '../LoginPage';*/
 
 function Header({ onDeviceSelect, onLogout }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     const [deviceNames, setDeviceNames] = useState([]);
     const navigate = useNavigate();
-    //const fileInputRef = React.useRef(null);
 
     const handleClickOpenProjectType = async () => {
         try {
@@ -52,12 +50,10 @@ function Header({ onDeviceSelect, onLogout }) {
                 onLogout();
             }
         } catch (error) {
-            // Handle logout failure
             console.error('Logout failed', error);
         }
     };
     const handleUpload = async () => {
-        // Create a promise to resolve when the file input changes
         const fileInputChangePromise = new Promise(resolve => {
             const fileInput = document.createElement('input');
             fileInput.type = 'file';
@@ -65,7 +61,6 @@ function Header({ onDeviceSelect, onLogout }) {
             fileInput.click();
         });
 
-        // Wait for the file input change
         const file = await fileInputChangePromise;
 
         if (!file) {
@@ -73,7 +68,6 @@ function Header({ onDeviceSelect, onLogout }) {
             return;
         }
 
-        // Prompt for the data type
         const dataType = window.prompt('Please enter the data type:');
         if (!dataType || dataType.trim() === '') {
             alert('Data type is required.');
@@ -105,8 +99,41 @@ function Header({ onDeviceSelect, onLogout }) {
             alert(`Error uploading file: ${error.message}`);
         }
     };
+    const handleExport = async () => {
+        const dataType = window.prompt('Please enter the data type:');
 
+        if (!dataType || dataType.trim() === '') {
+            alert('Data type is required.');
+            return;
+        }
 
+        const requestUrl = `/MainController/exportData/${encodeURIComponent(dataType)}`;
+
+        try {
+            const response = await fetch(requestUrl, {
+                method: 'GET',
+            });
+
+            if (response.ok) {
+                const blob = await response.blob();
+
+                const link = document.createElement('a');
+                link.href = window.URL.createObjectURL(blob);
+                link.download = `${dataType}_dataSets.json`;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+
+                alert('File exported');
+            } else {
+                const errorMessage = await response.text();
+                alert(`Error exporting file: ${errorMessage}`);
+            }
+        } catch (error) {
+            console.error('Error exporting file:', error);
+            alert(`Error exporting file: ${error.message}`);
+        }
+    };
 
     return (
         <header>
@@ -120,7 +147,7 @@ function Header({ onDeviceSelect, onLogout }) {
                 onClose={handleClose}>
                 <MenuItem onClick={handleClickOpenProjectType}>Open Project Type</MenuItem>
                 <MenuItem onClick={handleUpload}>Upload Data</MenuItem>
-                <MenuItem onClick={() => { }}>Export</MenuItem>
+                <MenuItem onClick={ handleExport }>Export</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>
             </Menu>
             <div>

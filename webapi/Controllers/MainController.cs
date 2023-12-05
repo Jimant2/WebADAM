@@ -168,22 +168,22 @@ public class MainController : ControllerBase
         }
     }
 
-    [HttpGet("exportData/{deviceName}")]
-    public async Task<IActionResult> ExportData(string deviceName)
+    [HttpGet("exportData/{dataType}")]
+    public async Task<IActionResult> ExportData(string dataType)
     {
         try
         {
-            if (string.IsNullOrEmpty(deviceName))
+            if (string.IsNullOrEmpty(dataType))
             {
                 return BadRequest("Device name is required.");
             }
 
             // Retrieve the data from the database based on deviceName
-            var dataSets = await dataService.GetDataSetsByDataTypeFromService(deviceName);
+            var dataSets = await dataService.GetDataSetsByDataTypeFromService(dataType);
 
             if (!dataSets.Any())
             {
-                return NotFound($"No data found for device named {deviceName}.");
+                return NotFound($"No data found for device named {dataType}.");
             }
           
             var jsonString = System.Text.Json.JsonSerializer.Serialize(dataSets);
@@ -191,7 +191,7 @@ public class MainController : ControllerBase
             // Create a byte array of the JSON string
             var jsonBytes = Encoding.UTF8.GetBytes(jsonString);
 
-            return File(jsonBytes, "application/json", $"{deviceName}_dataSets.json");
+            return File(jsonBytes, "application/json", $"{dataType}_dataSets.json");
         }
         catch (Exception ex)
         {

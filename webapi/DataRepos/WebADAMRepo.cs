@@ -9,21 +9,13 @@ namespace webapi.DataRepos
     {
         private readonly IMongoCollection<Device> deviceCollection;
         private readonly IMongoCollection<DataSet> dataSetCollection;
-        private readonly IMongoCollection<DataLoader> dataLoaderCollection;
         private readonly IMongoCollection<Users> usersCollection;
 
         public WebADAMRepo(IMongoDatabase database)
         {
             deviceCollection = database.GetCollection<Device>("Device");
             dataSetCollection = database.GetCollection<DataSet>("DataSet");
-            dataLoaderCollection = database.GetCollection<DataLoader>("DataLoader");
             usersCollection = database.GetCollection<Users>("Users");
-        }
-
-
-        public List<DataLoader> GetDataLoader()
-        {
-            return dataLoaderCollection.Find(_ => true).ToList();
         }
 
         public async Task<Device> GetDeviceByName(string deviceName)

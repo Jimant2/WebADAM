@@ -1,23 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using MongoDB.Bson;
-using MongoDB.Bson.Serialization;
 using MongoDB.Driver;
-using System.Globalization;
-using System.Text.Json;
 using System.Text;
 using webapi.Models;
 using webapi.Services;
-using static System.Runtime.InteropServices.JavaScript.JSType;
-using Swashbuckle.AspNetCore.SwaggerGen;
-using Newtonsoft.Json.Linq;
-using Newtonsoft.Json;
-using System.Xml;
 using webapi.LicenseModels;
 using System.Xml.Serialization;
-using System.Security.Cryptography;
 using webapi.DefinitionModels;
-using System.Linq.Expressions;
-using Amazon.Runtime.Internal;
+
 
 namespace webapi.Controllers;
 
@@ -36,12 +25,6 @@ public class MainController : ControllerBase
         dataService = _dataService;
     }
 
-    //[HttpGet("device")]
-    //public ActionResult<List<Device>> GetDevice()
-    //{
-    //   var device = deviceService.GetDeviceNameFromService();
-    //   return Ok(device);
-    //}
     [HttpPost]
     [Route ("addDeviceDefinitions")]
     public ActionResult<Device> AddDeviceDefinitions(IFormFile deviceFile)
@@ -119,13 +102,6 @@ public class MainController : ControllerBase
         }
     }
 
-    //[HttpGet("dataLoader")]
-    //public ActionResult<IEnumerable<DataLoader>> GetDataLoader()
-    //{
-    //    var data = _repository.GetDataLoader();
-    //    return Ok(data); 
-    //}
-
     [HttpPost("uploadFile")]
     public async Task<IActionResult> UploadFile(IFormFile file, string dataType)
     {
@@ -148,7 +124,6 @@ public class MainController : ControllerBase
     {
         try
         {
-            // Check if a file is uploaded
             if (licenseFile != null && licenseFile.Length > 0 && licenseFile.ContentType == "text/xml")
             {
                 using (var streamReader = new StreamReader(licenseFile.OpenReadStream()))
@@ -178,7 +153,6 @@ public class MainController : ControllerBase
                 return BadRequest("Device name is required.");
             }
 
-            // Retrieve the data from the database based on deviceName
             var dataSets = await dataService.GetDataSetsByDataTypeFromService(dataType);
 
             if (!dataSets.Any())
@@ -188,7 +162,6 @@ public class MainController : ControllerBase
           
             var jsonString = System.Text.Json.JsonSerializer.Serialize(dataSets);
 
-            // Create a byte array of the JSON string
             var jsonBytes = Encoding.UTF8.GetBytes(jsonString);
 
             return File(jsonBytes, "application/json", $"{dataType}_dataSets.json");

@@ -1,6 +1,4 @@
-﻿using System.Security.Cryptography;
-using System.Text;
-using webapi.DataRepos;
+﻿using webapi.DataRepos;
 using webapi.LicenseModels;
 using webapi.Models;
 
@@ -29,9 +27,5 @@ namespace webapi.Services
 
             await _repository.AddLicenseXmlAsync(user);
         }
-        //public async Task<License> GetLicenseFromService()
-        //{
-
-        //}
     }
 }

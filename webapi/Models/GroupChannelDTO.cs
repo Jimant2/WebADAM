@@ -1,6 +1,6 @@
 ﻿using webapi.DefinitionModels;
 
-namespace webapi.Services
+namespace webapi.Models
 {
     public class GroupChannelDTO
     {

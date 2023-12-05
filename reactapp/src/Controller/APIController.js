@@ -80,10 +80,10 @@ export async function fetchGroupsAndChannels(deviceName) {
         const response = await fetch(requestUrl);
         console.log('Fetched groups and channels:', response);
         const data = await response.json() || [];
-        return data;  // return data instead of calling this.setState
+        return data; 
     } catch (error) {
         console.error("Failed fetching groups and channels:", error);
-        throw error;  // re-throw to be caught in the calling component
+        throw error;  
     }
 }
 

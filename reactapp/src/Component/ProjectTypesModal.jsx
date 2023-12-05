@@ -6,7 +6,7 @@ import ReactDOM from 'react-dom';
 export function ProjectTypesModal({ open, onClose, deviceNames, onSelect }) {
     const [selectedDevice, setSelectedDevice] = useState(null);
     const externalWindowRef = useRef(null);
-    const containerElRef = useRef(document.createElement('div')); // Move the container element creation to a ref.
+    const containerElRef = useRef(document.createElement('div'));
 
     useEffect(() => {
         if (open) {
@@ -18,7 +18,6 @@ export function ProjectTypesModal({ open, onClose, deviceNames, onSelect }) {
             externalWindowRef.current.document.head.appendChild(cssLink);
             externalWindowRef.current.document.body.appendChild(containerElRef.current);
             externalWindowRef.current.addEventListener('beforeunload', () => {
-                //ReactDOM.root.unmount(containerElRef.current);
                 onClose();
             });
         }

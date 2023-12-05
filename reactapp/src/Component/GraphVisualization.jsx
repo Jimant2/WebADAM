@@ -9,7 +9,6 @@ const GraphVisualization = ({ data, dataType, formatTimestampToTime, lineColor})
     console.log("Received Data:", data, "DataType:", dataType);
     console.log("Received lineColor: ", lineColor);
 
-    // Custom Tooltip Component
     const CustomTooltip = ({ active, payload, label }) => {
         if (active && payload && payload.length) {
             return (
@@ -32,7 +31,7 @@ const GraphVisualization = ({ data, dataType, formatTimestampToTime, lineColor})
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="timestamp" scale="time" type="number" domain={['auto', 'auto']} tickFormatter={formatTimestampToTime} />
                 <YAxis />
-                <Tooltip content={<CustomTooltip />} /> {/* Use the CustomTooltip here */}
+                <Tooltip content={<CustomTooltip />} />
                 <Legend />
                 <Line type="monotone" dataKey={dataType} stroke={ lineColor } activeDot={{ r: 8 }} />
                 <Brush dataKey="timestamp" height={30} stroke="#8884d8" tickFormatter={formatTimestampToTime} />

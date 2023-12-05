@@ -1,10 +1,7 @@
 ﻿using MongoDB.Driver;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Linq;
 using webapi.Models;
 using webapi.DefinitionModels;
-using MongoDB.Bson;
-using webapi.LicenseModels;
+
 
 namespace webapi.DataRepos
 {

@@ -1,9 +1,6 @@
 ﻿using webapi.DefinitionModels;
 using webapi.DataRepos;
 using webapi.Models;
-using webapi.Services;
-using System;
-using Microsoft.AspNetCore.Identity;
 using System.Security.Claims;
 
 namespace webapi.Services
@@ -18,11 +15,6 @@ namespace webapi.Services
             _repository = repository;
             _authService = authService;
         }
-
-        //public async Task<List<Device>> GetAllDevicesFromService()
-        //{
-        //    return await _repository.GetAllDevicesAsync();
-        //}
 
         public async Task<List<string>> GetAllDeviceNamesFromService()
         {
@@ -53,26 +45,6 @@ namespace webapi.Services
             await _repository.AddChannelXmlAsync(device);
         }
 
-        //public async Task<List<GroupChannelDTO>> GetDefinitionByDeviceName(string deviceName, ClaimsPrincipal claimsPrincipal)
-        //{
-        //    var definition = await _repository.GetDefinitionByDeviceNameAsync(deviceName);
-
-        //    var definitionGroups = new List<GroupChannelDTO>();
-
-        //    foreach (var group in definition.ChannelDefinition.Groups)
-        //    {
-        //         var user = await _repository.FindByUsernameAsync(claimsPrincipal.Identity.Name);
-
-        //            var dto = new GroupChannelDTO
-        //            {
-        //                GroupName = group.Name,
-        //                Channels = _authService.GetAuthorizedChannels(group.Channels, user.LicenseXml)
-        //            };
-        //            definitionGroups.Add(dto);
-        //    }
-
-        //   return definitionGroups;
-        //}
         public async Task<List<GroupChannelDTO>> GetDefinitionByDeviceName(string deviceName, ClaimsPrincipal claimsPrincipal)
         {
             var definition = await _repository.GetDefinitionByDeviceNameAsync(deviceName);

@@ -7,8 +7,6 @@ namespace webapi.Services
 {
     public interface IDeviceService
     {
-        //public Task<List<Device>> GetAllDevicesFromService();
-
         public Task<List<string>> GetAllDeviceNamesFromService();
 
         public Task<Device> GetDeviceByNameFromService(string deviceName);

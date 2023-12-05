@@ -153,7 +153,6 @@ class App extends Component {
             const channelName = this.lookupNameByChannelId(channelId);
             console.log(`Fetching timestamps for graph ${index + 1}, channelName is:`, channelName);
 
-            // Fetch timestamps for the selected channelName
             const timestamps = await fetchTimestampsByDataType(channelName);
             console.log('Fetched timestamps:', timestamps);
 
@@ -173,10 +172,8 @@ class App extends Component {
         try {
             this.setState({ isTimestampModalOpen: false, loadingDatasets: true });
             this.setState({ loadingDatasets: true });
-            // Fetch datasets based on the selected timestamp
             const { data, dataType } = await fetchDatasetsByTimestamp(selectedTimestamp);
 
-            // Process the fetched datasets as needed
             const interval = this.state.aggregationInterval;
             const aggregatedData = [];
             const dataByInterval = {};
@@ -198,7 +195,6 @@ class App extends Component {
 
             console.log("Aggregated Data:", aggregatedData);
 
-            // Close the new window
             newWindow.close();
 
             this.setState((prevState) => {

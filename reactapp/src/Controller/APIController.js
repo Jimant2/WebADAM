@@ -163,7 +163,51 @@ export async function getAllDevices() {
         throw new Error(errorMessage);
     }
 }
+export async function handleLogin(username, password) {
+    const requestUrl = '/AuthController/login';
+    const requestData = {
+        username: username,
+        password: password
+    };
 
+    try {
+        const response = await fetch(requestUrl, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestData),
+            credentials: 'include'
+        });
+
+        return response; // Return the response for handling in the login page
+    } catch (error) {
+        throw new Error(`Error logging in: ${error.message}`);
+    }
+}
+
+export async function handleLicenseUpload(file) {
+    const formData = new FormData();
+    formData.append('licenseFile', file);
+
+    const requestUrl = '/MainController/uploadLicense';
+
+    try {
+        const response = await fetch(requestUrl, {
+            method: 'POST',
+            body: formData,
+            credentials: 'include',
+        });
+
+        if (response.ok) {
+            console.log('File uploaded successfully');
+        } else {
+            throw new Error(`Error uploading license: ${await response.text()}`);
+        }
+    } catch (error) {
+        throw new Error(`Error uploading license: ${error.message}`);
+    }
+}
 
 
 export async function getDeviceByName(deviceName) {

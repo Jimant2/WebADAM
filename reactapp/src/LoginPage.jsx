@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 import logo from './assets/DAC-logo.png';
+import { handleLicenseUpload, handleLogin } from './Controller/APIController';
 function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -22,63 +23,32 @@ function LoginPage() {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('licenseFile', selectedFile);
-
-        const requestUrl = '/MainController/uploadLicense'
         try {
-            const response = await fetch(requestUrl, {
-                method: 'POST',
-                body: formData,
-                credentials: 'include'
-            });
-
-            if (response.status === 200) {
-                alert("License uploaded!");
-                const data = await response.json();
-                console.log(data);
-            } else {
-                alert("Error uploading license!");
-                const errorData = await response.text();
-                console.error('Error uploading license:', errorData);
-            }
+            const data = await handleLicenseUpload(selectedFile);
+            alert("License uploaded!");
+            console.log(data);
         } catch (error) {
-            console.error('Error uploading license:', error);
+            alert("Error uploading license!");
+            console.error('Error uploading license:', error.message);
         }
     };
-
 
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        const requestUrl = '/AuthController/login';
-        const requestData = {
-            username: username,
-            password: password
-        };
-
         try {
-            const response = await fetch(requestUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                    
-                },
-                body: JSON.stringify(requestData),
-                credentials: 'include'
-            });
+            const response = await handleLogin(username, password);
 
-            if (response.status === 200) {
+            if (response.ok) {
                 navigation('/main');
             } else {
                 const errorData = await response.text();
                 console.error('Error logging in:', errorData);
-                alert("Error during login!")
-
+                alert("Error during login!");
             }
         } catch (error) {
             console.error('Error logging in:', error);
-            alert("Error during login!")
+            alert("Error during login!");
         }
     };
 

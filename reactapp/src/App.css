@@ -8,18 +8,18 @@
 
 .content-container {
     display: grid;
-    grid-template-columns: 200px 1fr; /* The first column (devices-container) is fixed width, the second column (graphs-container) takes the remaining space */
-    gap: 20px; /* Space between columns */
+    grid-template-columns: 200px 1fr; 
+    gap: 20px; 
     padding: 20px;
 }
 .devices-container, .graphs-container {
     overflow-y: auto;
-    max-height: calc(100vh - some_offset_px); /* Adjust the offset for header, footer, etc. */
+    max-height: calc(100vh - some_offset_px);
 }
-@media (max-width: 768px) { /* This breakpoint can be adjusted */
+@media (max-width: 768px) { 
     .content-container {
-        grid-template-columns: 1fr; /* Just single column */
-        grid-template-rows: auto 1fr; /* First row (devices-container) takes content size, second row (graphs-container) takes remaining space */
+        grid-template-columns: 1fr; 
+        grid-template-rows: auto 1fr;
     }
 }
 
@@ -104,7 +104,7 @@
     color: #fff;
     border: 2px solid #ccc
 }
-/*Tree directory*/
+
 .group-tree .group {
     border: 1px solid black;
     margin: 5px;
@@ -114,7 +114,6 @@
 }
 
     .group-tree .group ul {
-        /*list-style: none;*/
         padding-left: 20px;
     }
 

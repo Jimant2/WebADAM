@@ -8,6 +8,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import './Header.css';
+import logo from '../assets/DAC-logo.png';
 
 function Header({ onDeviceSelect, onLogout }) {
     const [anchorEl, setAnchorEl] = React.useState(null);
@@ -127,23 +128,25 @@ function Header({ onDeviceSelect, onLogout }) {
     };
 
     return (
-        <header>
-            <Button className="file-Button" onClick={handleClick}>
-                File
-            </Button>
-            <Menu
-                anchorEl={anchorEl}
-                keepMounted
-                open={Boolean(anchorEl)}
-                onClose={handleClose}>
-                <MenuItem onClick={handleClickOpenProjectType}>Open Project Type</MenuItem>
-                <MenuItem onClick={handleUploadProjectType}>Upload Project Type</MenuItem>
-                <MenuItem onClick={handleUpload}>Upload Data</MenuItem>
-                <MenuItem onClick={ handleExport }>Export</MenuItem>
-                <MenuItem onClick={handleLogout}>Logout</MenuItem>
-            </Menu>
-            <div>
-
+        <header className="header-container">
+            <div className="file-button-container">
+                <Button className="file-Button" onClick={handleClick}>
+                    File
+                </Button>
+                <Menu
+                    anchorEl={anchorEl}
+                    keepMounted
+                    open={Boolean(anchorEl)}
+                    onClose={handleClose}>
+                    <MenuItem onClick={handleClickOpenProjectType}>Open Project Type</MenuItem>
+                    <MenuItem onClick={handleUploadProjectType}>Upload Project Type</MenuItem>
+                    <MenuItem onClick={handleUpload}>Upload Data</MenuItem>
+                    <MenuItem onClick={handleExport}>Export</MenuItem>
+                    <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                </Menu>
+            </div>
+            <div className="logo-container">
+                <img className="header-logo" src={logo} alt="DAC Logo" />
             </div>
             <ProjectTypesModal
                 open={modalOpen}

@@ -295,7 +295,7 @@ class App extends Component {
 
         return (
             <div className="app-container">
-                <Header onDeviceSelect={this.handleDeviceSelection} onLogout={this.handleLogout}/>
+                <Header onDeviceSelect={this.handleDeviceSelection} onLogout={this.handleLogout} />
                 <div className="content-container">
                     <div className="devices-container">
                         {this.renderGroupTree()}

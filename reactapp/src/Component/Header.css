@@ -1,3 +1,21 @@
-header {
+.header-container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px; 
     background-color: white;
+}
+
+.logo-container {
+    margin-left: auto; 
+}
+
+.header-logo {
+    max-height: 50px;
+    width: auto;
+}
+
+.file-button-container {
+    display: flex;
+    align-items: center;
 }

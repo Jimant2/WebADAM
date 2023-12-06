@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
-import logo from './assets/DAC-logo.png';
+import logo from './assets/webADAM-logo.png';
 import { handleLicenseUpload, handleLogin } from './Controller/APIController';
 function LoginPage() {
     const [username, setUsername] = useState('');

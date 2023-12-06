@@ -8,7 +8,7 @@ import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
 import './Header.css';
-import logo from '../assets/DAC-logo.png';
+import logo from '../assets/webADAM-logo.png';
 
 function Header({ onDeviceSelect, onLogout }) {
     const [anchorEl, setAnchorEl] = React.useState(null);

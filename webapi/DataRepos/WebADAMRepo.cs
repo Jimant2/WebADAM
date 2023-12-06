@@ -17,12 +17,6 @@ namespace webapi.DataRepos
             dataSetCollection = database.GetCollection<DataSet>("DataSet");
             usersCollection = database.GetCollection<Users>("Users");
         }
-
-        public async Task<Device> GetDeviceByName(string deviceName)
-        {
-             return await deviceCollection.Find(device => device.deviceName == deviceName).FirstOrDefaultAsync();
-        }
-
         public async Task<List<Device>> GetAllDevicesAsync()
         {
             return await deviceCollection.Find(_ => true).ToListAsync();

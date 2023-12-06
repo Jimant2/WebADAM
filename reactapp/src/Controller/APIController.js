@@ -1,3 +1,5 @@
+import axios from 'axios';
+
 export async function fetchDatasetsByDataType(dataType) {
     const response = await fetch(`/MainController/dataSetByDataType/${dataType}`);
 
@@ -26,6 +28,71 @@ export async function fetchDatasetsByDataType(dataType) {
     } else {
         const errorMessage = `Failed to fetch datasets: ${await response.text()}`;
         throw new Error(errorMessage);
+    }
+}
+export async function uploadProjectType(file) {
+    try {
+        const apiUrl = '/MainController/addDeviceDefinitions';
+
+        const formData = new FormData();
+        formData.append('deviceFile', file);
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.ok) {
+            console.log('File uploaded successfully');
+        } else {
+            console.error('Failed to upload file');
+        }
+    } catch (error) {
+        console.error('Error uploading file', error);
+        throw new Error('Error uploading file');
+    }
+}
+export async function uploadFile(file, dataType) {
+    try {
+        const formData = new FormData();
+        formData.append('file', file);
+
+        const apiUrl = `/MainController/uploadFile?dataType=${encodeURIComponent(dataType)}`;
+
+        const response = await fetch(apiUrl, {
+            method: 'POST',
+            body: formData,
+        });
+
+        if (response.ok) {
+            console.log('File uploaded successfully');
+        } else {
+            const errorData = await response.json();
+            throw new Error(`Error uploading file: ${errorData.message || 'Unknown error'}`);
+        }
+    } catch (error) {
+        console.error('Error uploading file:', error);
+        throw new Error(`Error uploading file: ${error.message}`);
+    }
+}
+
+export async function exportData(dataType) {
+    try {
+        const apiUrl = `/MainController/exportData/${encodeURIComponent(dataType)}`;
+
+        const response = await fetch(apiUrl, {
+            method: 'GET',
+        });
+
+        if (response.ok) {
+            return await response.blob();
+        } else {
+            const errorMessage = await response.text();
+            throw new Error(`Error exporting file: ${errorMessage}`);
+        }
+    } catch (error) {
+        console.error('Error exporting file:', error);
+        throw new Error(`Error exporting file: ${error.message}`);
     }
 }
 
@@ -108,4 +175,13 @@ export async function getDeviceByName(deviceName) {
             const errorMessage = `Received non-JSON response: ${await response.text()}`;
             throw new Error(errorMessage);
         }
+}
+export async function logout() {
+    try {
+        await axios.post('/AuthController/logout');
+        console.log('Logout successful');
+    } catch (error) {
+        console.error('Logout failed', error);
+        throw new Error('Logout failed');
     }
+}

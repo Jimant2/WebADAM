@@ -3,11 +3,10 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Button from '@mui/material/Button';
 import { ProjectTypesModal } from './ProjectTypesModal';
-import { getAllDevices } from '@/Controller/APIController';
+import { getAllDevices, uploadProjectType, exportData, uploadFile, logout } from '@/Controller/APIController';
 import { useState } from 'react';
 import PropTypes from 'prop-types';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
 import './Header.css';
 
 function Header({ onDeviceSelect, onLogout }) {
@@ -43,14 +42,14 @@ function Header({ onDeviceSelect, onLogout }) {
   
     const handleLogout = async () => {
         try {
-            await axios.post('/AuthController/logout');
+            await logout();
             navigate('/');
             console.log('Logout successful');
             if (typeof onLogout === 'function') {
                 onLogout();
             }
         } catch (error) {
-            console.error('Logout failed', error);
+            console.error('Logout failed', error.message);
         }
     };
     const handleUpload = async () => {
@@ -74,28 +73,11 @@ function Header({ onDeviceSelect, onLogout }) {
             return;
         }
 
-        const formData = new FormData();
-        formData.append('file', file);
-
-        const requestUrl = `/MainController/uploadFile?dataType=${encodeURIComponent(dataType)}`;
-
         try {
-            const response = await fetch(requestUrl, {
-                method: 'POST',
-                body: formData,
-            });
-
-            if (response.ok) {
-                console.log('File uploaded successfully');
-                alert("File uploaded!")
-            } else {
-                console.error('Error response:', response);
-                const errorData = await response.json();
-                console.error('Error data:', errorData);
-                alert(`Error uploading file: ${errorData.message || 'Unknown error'}`);
-            }
+            await uploadFile(file, dataType);
+            alert("File uploaded!");
         } catch (error) {
-            console.error('Error uploading file:', error);
+            console.error('Error uploading file:', error.message);
             alert(`Error uploading file: ${error.message}`);
         }
     };
@@ -107,32 +89,41 @@ function Header({ onDeviceSelect, onLogout }) {
             return;
         }
 
-        const requestUrl = `/MainController/exportData/${encodeURIComponent(dataType)}`;
-
         try {
-            const response = await fetch(requestUrl, {
-                method: 'GET',
-            });
+            const blob = await exportData(dataType);
 
-            if (response.ok) {
-                const blob = await response.blob();
+            const link = document.createElement('a');
+            link.href = window.URL.createObjectURL(blob);
+            link.download = `${dataType}_dataSets.json`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
 
-                const link = document.createElement('a');
-                link.href = window.URL.createObjectURL(blob);
-                link.download = `${dataType}_dataSets.json`;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-
-                alert('File exported');
-            } else {
-                const errorMessage = await response.text();
-                alert(`Error exporting file: ${errorMessage}`);
-            }
+            alert('File exported');
         } catch (error) {
-            console.error('Error exporting file:', error);
+            console.error('Error exporting file:', error.message);
             alert(`Error exporting file: ${error.message}`);
         }
+    };
+    const handleUploadProjectType = async () => {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.xml';
+
+        input.onchange = async (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                try {
+                    await uploadProjectType(file);
+                    alert("File uploaded!");
+                } catch (error) {
+                    alert("File failed to upload!");
+                    console.error('Failed to upload file:', error.message);
+                }
+            }
+        };
+
+        input.click();
     };
 
     return (
@@ -146,6 +137,7 @@ function Header({ onDeviceSelect, onLogout }) {
                 open={Boolean(anchorEl)}
                 onClose={handleClose}>
                 <MenuItem onClick={handleClickOpenProjectType}>Open Project Type</MenuItem>
+                <MenuItem onClick={handleUploadProjectType}>Upload Project Type</MenuItem>
                 <MenuItem onClick={handleUpload}>Upload Data</MenuItem>
                 <MenuItem onClick={ handleExport }>Export</MenuItem>
                 <MenuItem onClick={handleLogout}>Logout</MenuItem>

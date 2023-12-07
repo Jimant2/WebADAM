@@ -97,7 +97,7 @@ class App extends Component {
     }
 
     renderDevices = (devices) => {
-        return <span>Device: {devices[0]?.deviceName || 'None'}</span>
+        return <span><strong>Device: {devices[0]?.deviceName || 'None'}</strong></span>
     }
     renderGroupTree = () => {
         const currentDeviceName = this.state.selectedDeviceName;
@@ -304,7 +304,7 @@ class App extends Component {
                     <div className="graphs-container">
                         {deviceContent}
                         <div className="aggregation-dropdown">
-                            <label>Interval: </label>
+                            <label><strong>Interval: </strong></label>
                             <select
                                 value={this.state.aggregationInterval}
                                 onChange={(e) => this.setState({ aggregationInterval: Number(e.target.value) })}

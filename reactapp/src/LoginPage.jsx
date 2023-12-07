@@ -22,7 +22,6 @@ function LoginPage() {
             alert("No license selected");
             return;
         }
-
         try {
             const data = await handleLicenseUpload(selectedFile);
             alert("License uploaded!");

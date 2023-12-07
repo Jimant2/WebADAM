@@ -26,7 +26,7 @@ const GraphVisualization = ({ data, dataType, formatTimestampToTime, lineColor})
         label: PropTypes.number
     };
     return (
-        <ResponsiveContainer>
+        <ResponsiveContainer className="responsive-container">
             <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="timestamp" scale="time" type="number" domain={['auto', 'auto']} tickFormatter={formatTimestampToTime} />

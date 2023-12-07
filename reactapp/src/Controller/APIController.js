@@ -169,7 +169,6 @@ export async function handleLogin(username, password) {
         username: username,
         password: password
     };
-
     try {
         const response = await fetch(requestUrl, {
             method: 'POST',

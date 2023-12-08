@@ -150,14 +150,14 @@ public class MainController : ControllerBase
         {
             if (string.IsNullOrEmpty(dataType))
             {
-                return BadRequest("Device name is required.");
+                return BadRequest("Data type name is required.");
             }
 
             var dataSets = await dataService.GetDataSetsByDataTypeFromService(dataType);
 
             if (!dataSets.Any())
             {
-                return NotFound($"No data found for device named {dataType}.");
+                return NotFound($"No data found for data type named {dataType}.");
             }
           
             var jsonString = System.Text.Json.JsonSerializer.Serialize(dataSets);
